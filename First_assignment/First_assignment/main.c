@@ -5,11 +5,65 @@
 #include<time.h>
 
 
+// vector da 16 byte( 8 + 4 + 4)
+// per leggere  correttamente devi leggere ogni indirizzo del parametro 
+typedef struct vector {
+	int* nums;
+	int n;
+	int capacity; // capacity of nums array
+}vector;
+
+// facciamo un costruttore ( che in C non si puo fare )
+
+void vector_constructor(vector* this)
+{
+	this->nums = NULL;
+	this->n = 0;
+	this->capacity = 0;
+}
+
+// adessiamo usiamo questo costruttore 
+/* 
+		QUESTO E' UN ESEMPIO
+		vector v;
+		e poi possiamo sostituire tutto il linguaggio con le istanze v.nums, v.n e v.capacity,
+
+*/
+
+// distruttore 
+
+void vector_destructor(vector *this)
+{
+	free(this);
+}
+
+void vector_push_back(vector* this, int val) {
+	// fa l'append nel vettore del numero trovato sul file
+	// se sbagliamo l'allocazione usaimo un exit(EXIT_FAILURE)
+
+}
+
+void vector_sort(vector *this) {
+	// lo dice il metodo... 
+}
+
+int vector_size(const vector* this) {
+	// è un GetSize per il OOP, notando che visto che non modifichiamo il puntatore vector possiamo possiamo usare 'const'
+	return this->n;
+}
+
+int vector_add(const vector* this, int i) {
+	assert(i >= 0 && i < this->n);
+
+	return this->nums[i];
+}
+
 void Scambia(int* a, int* b) {
 	int tmp = *a;
 	*a = *b;
 	*b = tmp;
 }
+
 
 /*void  Bubble(int dim, int vet[]){
 	int i;
@@ -80,7 +134,7 @@ int main(int argc, char* argv[]) {
 			}
 			else
 			{
-				// ri allochiamo 
+				// ri allochiamo( questa è l'append)
 				value = realloc(value, (dim_2));
 
 				value[dim_2 - 1] = ch;
@@ -171,7 +225,8 @@ int main(int argc, char* argv[]) {
 	t2 = clock();
 
 	printf("tempo di esecuzione: %.10f sec\n", (t2 - t1) / (double)(CLOCKS_PER_SEC));
-
+	free(value);
+	free(values);
 	fclose(filein);
 	fclose(fileout);
 	return 0;
