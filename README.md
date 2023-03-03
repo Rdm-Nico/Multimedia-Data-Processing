@@ -1,2 +1,2 @@
 # Multimedia-Data-Processing
-exercies of the course of Multimedia Data Processing
+Exercies of the course of Multimedia Data Processing
