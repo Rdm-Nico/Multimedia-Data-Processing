@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <assert.h>
 
-// C++ version of the assignment By the Prof  & ChatGPT
+// Second version of the @main.cpp item but with class vector and shallow copy 
 
 int cmpfunc(const void* a, const void* b)
 {
@@ -22,23 +22,27 @@ int cmpfunc(const void* a, const void* b)
 }
 
 struct vector {
-    // attributes of the Object 'vector'    
-    int32_t* nums_; 
+    int32_t* nums_;
     int n_;
     int capacity_; // capacity of nums array
 
-    void constructor() {
+    vector() { // costructor of the class = with the same name 
         nums_ = NULL;
         n_ = 0;
         capacity_ = 0;
     }
-    void destructor() {
+    vector(int initial_size) { // another costructor but with a inizialize value of capacity
+        nums_ = (int32_t*)calloc(initial_size, sizeof(int32_t));
+        n_ = initial_size;
+        capacity_ = initial_size;
+    }
+    ~vector() { // distructor 
         free(nums_);
     }
-    void push_back(int32_t num) { // append of the number read
+    void push_back(int32_t num) {
         if (n_ == capacity_) {
             capacity_ = (capacity_ == 0 ? 1 : capacity_ * 2);
-            nums_ = (int32_t*)realloc(nums_, capacity_ * sizeof(int32_t)); // using of Cast for the realloc 
+            nums_ = (int32_t*)realloc(nums_, capacity_ * sizeof(int32_t));
             if (nums_ == NULL) {
                 printf("Error: failed to allocate memory.\n");
                 exit(EXIT_FAILURE);
@@ -59,6 +63,9 @@ struct vector {
     }
 };
 
+void raddoppia(int& val) {
+    val *= 2;
+}
 
 int main(int argc, char* argv[])
 {
@@ -81,7 +88,6 @@ int main(int argc, char* argv[])
     }
 
     vector v;
-    v.constructor();
 
     while (1) {
         int32_t num;
@@ -97,13 +103,21 @@ int main(int argc, char* argv[])
         }
     }
 
+    vector x = v; // FAIL! Shallow copy! 
+    /*
+        A shallow copy of an object is a copy whose properties share the same references (point to the same underlying values)
+        as those of the source object from which the copy was made.
+        As a result, when you change either the source or the copy, 
+        you may also cause the other object to change too — and so, 
+        you may end up unintentionally causing changes to the source or copy that you don't expect.  
+    */
+
     v.sort();
 
     for (int i = 0; i < v.size(); i++) {
         fprintf(fout, "%" PRId32 "\n", v.at(i));
     }
 
-    v.destructor();
     fclose(fin);
     fclose(fout);
 
