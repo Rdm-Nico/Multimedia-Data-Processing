@@ -26,7 +26,7 @@ struct vector {
     int n_;
     int capacity_; // capacity of nums array
 
-    vector() { // costructor of the class = with the same name 
+    vector() { // costructor of the class = with the same name  ( costruttore di defalut)
         nums_ = NULL;
         n_ = 0;
         capacity_ = 0;
@@ -35,6 +35,52 @@ struct vector {
         nums_ = (int32_t*)calloc(initial_size, sizeof(int32_t));
         n_ = initial_size;
         capacity_ = initial_size;
+    }
+
+    vector(const vector& other) {
+        // una reference che non constene di modificare other
+        // per passare le stringe ad una funzione non usate strig, cost String& nome
+        n_ = other.n_;
+        capacity_ = other.capacity_;
+        nums_ = (int32_t *)malloc(capacity_* sizeof(int32_t));
+        // check della allocazione di memoria 
+        for (size_t i = 0; i < n_; i++)
+        {
+            nums_[i] = other.nums_[i];
+            // la memcpy andava più forte perchè: usare accelerazione hardware più forti
+        }
+    }
+
+    vector&  operator=(const vector &other) {
+        /*
+        su Moodle c'è una versione 3 del main con un metodo di assegnamento che sfrutta meno codice ( ma è meno ottimizzato)
+        copy-and-swap idiom
+        
+        utlizzo di una funzione friend( amica della classe)
+        friend void swap(vector &left, vector &right)
+
+        */
+        /* ----------------------------------------------------------------------------------*/
+        // controllo il self-assignment 
+        if (this != &other) // questo '&' è l'operatore indirizzo
+        {
+            if (capacity_ < other.n_) // se la capacità non è sufficente per copiare tutti i dati
+            {
+                // distruggo prima il vecchio vettore
+                free(nums_);
+                //  copio numero di elementi e capacità e alloco memoria 
+                capacity_ = other.capacity_;
+                nums_ = (int32_t*)malloc(capacity_ * sizeof(int32_t));
+            }
+            // copio i dati
+            n_ = other.n_;
+            
+            for (size_t i = 0; i < n_; i++)
+            {
+                nums_[i] = other.nums_[i];
+            }
+        }
+        return *this; // dereferenziare this --> ritornare la cosa puntata da this 
     }
     ~vector() { // distructor 
         free(nums_);
@@ -57,8 +103,19 @@ struct vector {
     int size() const {
         return n_;
     }
-    int32_t at(int i) const {
+    int32_t at(int i) const { // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
         assert(i >= 0 && i < n_);
+        return nums_[i];
+    }
+    // bisogna fare l'overloading per la funzione: due versione dello stesso metodo, ma sono due funzioni diverse
+    /*
+        Una versione in cui non si può modificare il valore ritornato ( la seconda )
+        Una versione in cui si può utilizzare il valore ritornato( la prima)
+    */
+    int32_t&  operator[](int i) { // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
+        return nums_[i];
+    }
+    const int32_t& operator[](int i)  const{ // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
         return nums_[i];
     }
 };
@@ -67,8 +124,38 @@ void raddoppia(int& val) {
     val *= 2;
 }
 
+
+void scrivi(FILE *F, const vector& v) {
+    for (int i = 0; i < v.size(); i++) {
+        fprintf(fout, "%" PRId32 "\n", v[i])); 
+    }
+}
+
+struct numero
+{
+    int val_;
+    //numero() : val_(7){}// quando volete iniziallizare gli attributi di una classe , lo fate prima
+    numero() {
+        val_ = 7;
+    }
+};
+
 int main(int argc, char* argv[])
 {
+    /*numero* pn = (numero*)malloc(sizeof(numero));
+    int q = pn->val_; // la malloc ritorna memoria e basta 
+    // serve una nuova modalità di allocare memoria 
+    Si utilizzerà:*/
+    numero* pn = new  numero;
+    int q = pn->val_;
+    // non c'è la garbage collection --> si deve liberare la memoria 
+    delete pn;
+
+    // la sintassi per allocare più di un oggetto insieme:
+    numero* pt = new  numero[10];
+    
+    delete[] pt;
+
     if (argc != 3) {
         printf("Usage: sort_int <filein.txt> <fileout.txt>\n");
         return 1;
@@ -104,19 +191,33 @@ int main(int argc, char* argv[])
     }
 
     vector x = v; // FAIL! Shallow copy! 
+
+    /*
+        NON si può scrivere:
+        vector y;
+        x = v;
+        PERCHE' ADESSO STIAMO ASSEGNANDO, NON PIU' INIZIALLIZANDO
+        farà una shallow copy !!! 
+    */
+    vector y;
+    y = v;
     /*
         A shallow copy of an object is a copy whose properties share the same references (point to the same underlying values)
         as those of the source object from which the copy was made.
         As a result, when you change either the source or the copy, 
         you may also cause the other object to change too — and so, 
         you may end up unintentionally causing changes to the source or copy that you don't expect.  
-    */
+    */    
+    /*NON SI PUO FARE v[0] = 5  , perchè deve essere una variabile --> essere un indirizzo di memoria, si inserisce una reference per farlo diventare un l-value*/
+
+
+    vector z;
+    z = y = v;
 
     v.sort();
 
-    for (int i = 0; i < v.size(); i++) {
-        fprintf(fout, "%" PRId32 "\n", v.at(i));
-    }
+
+    scrivi(fout, v);
 
     fclose(fin);
     fclose(fout);
