@@ -51,36 +51,15 @@ struct vector {
         }
     }
 
-    vector&  operator=(const vector &other) {
-        /*
-        su Moodle c'è una versione 3 del main con un metodo di assegnamento che sfrutta meno codice ( ma è meno ottimizzato)
-        copy-and-swap idiom
-        
-        utlizzo di una funzione friend( amica della classe)
-        friend void swap(vector &left, vector &right)
-
-        */
-        /* ----------------------------------------------------------------------------------*/
-        // controllo il self-assignment 
-        if (this != &other) // questo '&' è l'operatore indirizzo
-        {
-            if (capacity_ < other.n_) // se la capacità non è sufficente per copiare tutti i dati
-            {
-                // distruggo prima il vecchio vettore
-                free(nums_);
-                //  copio numero di elementi e capacità e alloco memoria 
-                capacity_ = other.capacity_;
-                nums_ = (int32_t*)malloc(capacity_ * sizeof(int32_t));
-            }
-            // copio i dati
-            n_ = other.n_;
-            
-            for (size_t i = 0; i < n_; i++)
-            {
-                nums_[i] = other.nums_[i];
-            }
-        }
-        return *this; // dereferenziare this --> ritornare la cosa puntata da this 
+    vector& operator=(vector other) { // copy-and-swap idiom
+        swap(*this, other);
+        return *this;
+    }
+    friend void swap(vector& left, vector& right) {
+        using std::swap;
+        swap(left.n_, right.n_);
+        swap(left.capacity_, right.capacity_);
+        swap(left.nums_, right.nums_);
     }
     ~vector() { // distructor 
         free(nums_);
