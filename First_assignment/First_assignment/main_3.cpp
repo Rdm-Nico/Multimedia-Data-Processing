@@ -139,7 +139,6 @@ struct vector {
                 tmp[i] = nums_[i];
             }
             
-            /* utilizzo di nullptr per fare puntare ad other dove ? Non si sa, a nulla in realtà ---> cosi da evitare di fare copie inutili di dati */
 
             delete[] nums_;
             nums_ = tmp;

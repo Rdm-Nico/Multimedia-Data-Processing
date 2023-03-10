@@ -62,7 +62,7 @@ namespace mpd {
             n_ = other.n_;
             capacity_ = other.capacity_;
             nums_ = other.nums_;
-            other.nums_ = nullptr;
+            other.nums_ = nullptr; /* utilizzo di nullptr per fare puntare ad other dove ? Non si sa, a nulla in realtà ---> cosi da evitare di fare copie inutili di dati */
         }
         /*    vector &operator=(const vector &other) {
                 printf("copy assignment\n");
