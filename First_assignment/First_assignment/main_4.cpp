@@ -56,7 +56,8 @@ namespace mpd {
                 nums_[i] = other.nums_[i];
             }
         }
-        vector(vector&& other) {
+        vector(vector&& other) noexcept { // MOVE COSTRUCTOR: di fianco al move costruct ci dovrebbe scritto --> noexcept 
+
             printf("move constructor\n");
             n_ = other.n_;
             capacity_ = other.capacity_;
