@@ -103,9 +103,9 @@ int main(int argc, char* argv[])
         fprintf(fout, "%" PRId32 "\n", v.at(i));
     }
 
-    v.destructor();
+    v.destructor(); // nella return avviene comunque la distruzione della classe
     fclose(fin);
     fclose(fout);
 
-    return 0;
+    return 0; 
 }

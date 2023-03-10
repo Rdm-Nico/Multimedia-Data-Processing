@@ -24,7 +24,7 @@ int cmpfunc(const void* a, const void* b)
 struct vector {
     int32_t* nums_;
     int n_;
-    int capacity_; // capacity of nums array
+    int capacity_; 
 
     vector() { // costructor of the class = with the same name  ( costruttore di defalut)
         nums_ = NULL;
@@ -94,7 +94,7 @@ struct vector {
     int32_t&  operator[](int i) { // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
         return nums_[i];
     }
-    const int32_t& operator[](int i)  const{ // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
+    const int32_t& operator[](int i)  const{ 
         return nums_[i];
     }
 };
