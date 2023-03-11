@@ -91,8 +91,8 @@ int main(int argc, char* argv[])
     for (int i = 0; i < v.size(); ++i) {
         os << v[i];
         os << '\n';
-        /* si può scrivere anche una cosa del genere: os << v[i] << '\n' */
-    } */
+        // si può scrivere anche una cosa del genere: os << v[i] << '\n' 
+        */
 
     /* versione con iteratori classica ( che fa molto scifo)*/
     /*std::vector<double>::iterator start = v.begin(); // un eratore è una classe specifica 
@@ -126,5 +126,7 @@ int main(int argc, char* argv[])
     // dato un range di cose -->legge ogni elemento è lo scrive in un output iterator
     // ostream_iterator --> prende in input uno stream e lo rende un iteratore, 
 
+
+    
     return 0;
 }
