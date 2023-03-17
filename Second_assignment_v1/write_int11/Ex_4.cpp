@@ -38,6 +38,11 @@ int main(int argc, char* argv[]) {
             std::bitset<11> b1(v[t]);
             b.push_back(b1);
     }
+
+    /*for (size_t t = 0; t < v.size(); ++t)
+    {
+        std::cout << v[t] << '\t' << b[t] << '\n';
+    }*/
     
     uint8_t buf = 0;
     uint8_t bit;
@@ -59,23 +64,21 @@ int main(int argc, char* argv[]) {
                 // inseriamo i bit rimasti
                 num = 0;
                 buf = 0;
-                u--;
-                while(1)
-                {
-                    bit = b[t][u];
-                    buf = buf * 2 + bit;
-                    num++;
-                    if (u == 0)
-                    {
-                        break;
-                    }
+                if(u != 0)
                     u--;
+                else
+                {
+                    break;
                 }
-                break;
+
             }
+            else if( u == 0)
+                break;
             else
+            {
                 // decrementiamo u
                 u--;
+            }
         }
 
     }
