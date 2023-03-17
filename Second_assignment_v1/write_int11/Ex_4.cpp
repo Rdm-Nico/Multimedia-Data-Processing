@@ -31,7 +31,7 @@ int main(int argc, char* argv[]) {
     // init the vector with the all values 
     std::vector<int32_t> v(is_start, is_stop);
 
-    std::vector<std::bitset<11>> b; 
+    std::vector<std::bitset<11> > b; 
 
     for (size_t t = 0; t < v.size(); ++t)
     {
@@ -39,10 +39,10 @@ int main(int argc, char* argv[]) {
             b.push_back(b1);
     }
 
-    /*for (size_t t = 0; t < v.size(); ++t)
+    for (size_t t = 0; t < v.size(); ++t)
     {
         std::cout << v[t] << '\t' << b[t] << '\n';
-    }*/
+    }
     
     uint8_t buf = 0;
     uint8_t bit;
