@@ -4,6 +4,7 @@
 #include<vector>
 #include<bitset>
 #include<string>
+#include<cmath>
 
 
 
@@ -18,26 +19,26 @@ class bitwriter {
 	uint8_t buffer_;
 	int n_ = 0; //  numero di elementi nel buffer 
 	std::ostream& os_; // memorizziamo lo stream con una reference  e lui si occupa di gestire la memoria 
-	// è un riferimento perchè non vogliamo copiare lo stream, vogliamo solo accedere a quello che è già stato creato
-	// quando verrà distrutto il bitwriter lo stream verrà distrutto anche lui
+	// ï¿½ un riferimento perchï¿½ non vogliamo copiare lo stream, vogliamo solo accedere a quello che ï¿½ giï¿½ stato creato
+	// quando verrï¿½ distrutto il bitwriter lo stream verrï¿½ distrutto anche lui
 
 	std::ostream& write_bit(uint8_t bit) {
 		buffer_ = buffer_ * 2 + bit;
 		n_++;
-		if (n_ == 8) { // se n è 8 scriviamo il buffer
+		if (n_ == 8) { // se n ï¿½ 8 scriviamo il buffer
 			raw_write(os_, buffer_);
 			n_ = 0; // resetto il buffer
 		}
 		return os_;
 	}
-	// rendiamo write_bit privata perchè non vogliamo che venga chiamata dall'esterno
+	// rendiamo write_bit privata perchï¿½ non vogliamo che venga chiamata dall'esterno
 public:
 
 	bitwriter(std::ostream& os) : os_(os) {}// non esiste un costruttore di defalut per un output stream
 
 	~bitwriter() {
-		flush(); // quando distruggiamo il bitwriter facciamo il flush perchè potrebbero esserci dei bit rimasti nel buffer
-		// prima verrà distrutto il bitwriter e poi l'output stream
+		flush(); // quando distruggiamo il bitwriter facciamo il flush perchï¿½ potrebbero esserci dei bit rimasti nel buffer
+		// prima verrï¿½ distrutto il bitwriter e poi l'output stream
 	}
 
 	std::ostream& flush(uint32_t bit = 0) {
@@ -72,7 +73,10 @@ void toElias(std::vector<int32_t>& v,std::ostream& os)
 	// mappiamo in gamma di Elias 
 	for (const  auto &x :v)
 	{
+		//mappiamo in gamma di Elias
+		// calcoliamo il logaritmo in base 2 di x
 		auto N = (int)log2(x);
+		
 		// calcoliamo la dimensione in bit 
 		auto dim = 2 * N + 1;
 		// scriviamo N zero bits 
@@ -130,7 +134,7 @@ int main(int argc, char* argv[]) {
 	else if(mode == "c")
 	{
 		// questo possiamo prendere l'es del prof 
-		// apriamo il primo file in modalità testo 
+		// apriamo il primo file in modalitï¿½ testo 
 		std::ifstream is(argv[2]);
 
 		if (!is) {
@@ -149,7 +153,7 @@ int main(int argc, char* argv[]) {
 		// mappiamo gli elem da 1 a infito 
 		map(v);
 
-		// apriamo un file output in modalità scrittura bin
+		// apriamo un file output in modalitï¿½ scrittura bin
 		std::ofstream out(argv[3], std::ios::binary);
 		if (!out) {
 			std::cout << "Error opening output  file.\n";
