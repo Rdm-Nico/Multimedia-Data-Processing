@@ -3,6 +3,9 @@
 #include<iterator>
 #include<vector>
 #include<bitset>
+#include<string>
+
+
 
 
 template<typename T>
@@ -10,20 +13,72 @@ std::ostream& raw_write(std::ostream& os, const T& val, size_t size = sizeof(T))
 	return os.write(reinterpret_cast<const char*>(&val), size);
 }
 
+
+class bitwriter {
+	uint8_t buffer_;
+	int n_ = 0; //  numero di elementi nel buffer 
+	std::ostream& os_; // memorizziamo lo stream con una reference  e lui si occupa di gestire la memoria 
+	// è un riferimento perchè non vogliamo copiare lo stream, vogliamo solo accedere a quello che è già stato creato
+	// quando verrà distrutto il bitwriter lo stream verrà distrutto anche lui
+
+	std::ostream& write_bit(uint8_t bit) {
+		buffer_ = buffer_ * 2 + bit;
+		n_++;
+		if (n_ == 8) { // se n è 8 scriviamo il buffer
+			raw_write(os_, buffer_);
+			n_ = 0; // resetto il buffer
+		}
+		return os_;
+	}
+	// rendiamo write_bit privata perchè non vogliamo che venga chiamata dall'esterno
+public:
+
+	bitwriter(std::ostream& os) : os_(os) {}// non esiste un costruttore di defalut per un output stream
+
+	~bitwriter() {
+		flush(); // quando distruggiamo il bitwriter facciamo il flush perchè potrebbero esserci dei bit rimasti nel buffer
+		// prima verrà distrutto il bitwriter e poi l'output stream
+	}
+
+	std::ostream& flush(uint32_t bit = 0) {
+		while (n_ > 0) {
+			write_bit(bit);
+		}
+		return os_;
+	}
+	std::ostream& write(uint32_t u, uint8_t n) {
+		// while (n_ --> 0) // prendo n lo decremento e lo confronto con 0
+		// {
+		//     write_bit(u >> n_);
+		// }
+
+		for (int i = n - 1; i >= 0; --i) {
+			uint32_t cure_bit = (u >> i) & 1; // prendiamo il bit i-esimo
+			write_bit(cure_bit);
+		}
+		return os_;
+	}
+
+	std::ostream& operator()(uint32_t u, uint8_t n) { // alternativa a chiamare la  write
+		return write(u, n);
+	}
+
+};
+
+
 void toElias(std::vector<int32_t>& v,std::ostream& os)
 {
+	bitwriter rw(os);
 	// mappiamo in gamma di Elias 
-	for (const  auto &x:v)
+	for (const  auto &x :v)
 	{
 		auto N = (int)log2(x);
-		// rempiamo un buffer di 2(log_2(x)) + 1 bits
+		// calcoliamo la dimensione in bit 
 		auto dim = 2 * N + 1;
+		// scriviamo N zero bits 
+		rw(0, N);
+		// scriviamo il numero x in binario 
 
-		uint8_t** arr = new uint8_t * [dim];
-		for (size_t i = 0; i < N; i++)
-		{
-			arr[i] = 0;
-		}
 
 
 	}
@@ -31,25 +86,27 @@ void toElias(std::vector<int32_t>& v,std::ostream& os)
 }
 
 
-void map(std::vector<int32_t>& v)
+void map(std::vector<int32_t> v)
 {
-	for (size_t i = 0; i < v.size(); i++)
+	for (auto &x : v)
 	{
-		if (v[i] == 0)
+		if (x == 0)
 		{
-			v[i] = 1;
+			x = 1;
 		}
-		else if (v[i] < 0)
+		else if (x < 0)
 		{
-			auto k = abs(v[i]);
+			auto k = abs(x);
 
-			v[i] = k * 2;
+			x = k * 2;
 		}
 		else 
 		{
 
-			v[i] = (v[i]* 2)+1;
+			x = (x* 2)+1;
 		}
+		std::cout << x;
+		std::cout << '\n';
 	}
 }
 
@@ -62,13 +119,15 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
+	std::string mode = argv[1];
+
 	// guardiamo se il file deve essere compresso oppure decompresso 
-	if (*argv[1] != 'c' & 'd')
+	if (mode != "c" && mode != "d")
 	{
 		std::cout << "errore nella sintassi [c\d]\n"; 
 		return 1;
 	}
-	else if(*argv[1] == 'c')
+	else if(mode == "c")
 	{
 		// questo possiamo prendere l'es del prof 
 		// apriamo il primo file in modalità testo 
