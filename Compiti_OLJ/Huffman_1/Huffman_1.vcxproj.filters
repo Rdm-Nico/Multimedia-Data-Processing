@@ -15,25 +15,18 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\..\..\..\Downloads\canvas.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\..\..\..\Downloads\main.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="main_2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="canvas_2.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\..\..\..\..\Downloads\canvas.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <Text Include="..\..\..\..\..\..\Downloads\example_01.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="..\..\..\..\..\..\..\Downloads\drawing1.txt" />
+    <None Include="..\..\..\..\..\..\Downloads\example_01.bin">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
