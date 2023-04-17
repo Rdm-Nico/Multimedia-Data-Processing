@@ -1,0 +1,1 @@
+// fate un array di 3 elementi per rgb  

@@ -1,4 +1,4 @@
-// librerie per la lettura e scrittura su file 
+    // librerie per la lettura e scrittura su file 
 #include <iostream> // per la scrittura nello stream
 #include <fstream> // per i file
 #include<algorithm>
