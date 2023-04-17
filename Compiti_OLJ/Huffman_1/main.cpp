@@ -13,17 +13,18 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string mode = argv[1];
+	std::string file_name = argv[2];
 	if (mode != "c" && mode != "d") {
 		std::cout << "errore nella sintassi";
 		return 1;
 	}
 	else if (mode == "c") {
-		// apriamo il file in modalita binario 
-		std::ifstream is(argv[2], std::ios::binary);
-		//if (!is) {
-			//std::cout << "Errore nell'apertura";
-			//return 1;
-		//}
+		// apriamo il file in modalita binaria 
+		std::ifstream is(file_name, std::ios::binary);
+		if (!is) {
+			std::cout << "Errore nell'apertura";
+			return 1;
+		}
 		// leggiamo i valori da file
 
 		std::istream_iterator<int32_t> is_start(is);
