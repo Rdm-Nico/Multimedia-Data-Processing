@@ -51,7 +51,7 @@ struct mat {
 		return reinterpret_cast<const char *>(&data_[0]);
 	}
 };
-// sempre una const & perchè vogliamo non vogliamo una  copia 
+// sempre una const & perchï¿½ vogliamo non vogliamo una  copia 
 bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda se vuoi string view C++ 17
 	// create the PAM file 
 	std::ofstream out(filename,std::ios::binary); // per non tradurre i \n 
@@ -87,7 +87,7 @@ bool load_pam(mat<uint8_t> &img, const std::string& filename) {
 	if (!is)
 		return false;
 
-	// dentro string c'è getline
+	// dentro string c'ï¿½ getline
 	std:: string magic_number;
 	std::getline(is, magic_number);
 	// fino a end token ci sono le varie righe  -> che possono essere inserite in ordine causale 
@@ -113,6 +113,8 @@ bool load_pam(mat<uint8_t> &img, const std::string& filename) {
 		else if (token == "DEPTH"){
 			int depth;
 			ss >> depth;
+			if (depth != 1) // perchÃ¨ abbiamo solo immagini a 1 canale
+				return false;
 		}
 		else if (token == "MAXVAL"){
 			int  maxval;
@@ -134,7 +136,7 @@ bool load_pam(mat<uint8_t> &img, const std::string& filename) {
 	{
 		for (int c = 0; c < img.cols(); ++c)
 		{
-			img(r, c) = is.get(); // put scrive un byte 
+			img(r, c) = is.get(); // put permette di scrivere un byte
 		}
 	}
 
