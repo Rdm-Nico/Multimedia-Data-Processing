@@ -98,7 +98,43 @@ void flip_inplace(mat<T>& img) {
 	}
 }
 
-bool load_pam(mat<uint8_t> &img, const std::string& filename) {
+// per l'img a colori RGB
+using rgb = std::array<uint8_t, 3>; // array di 3 byte
+
+
+bool save_pam(const mat<rgb>& img, const std::string& filename) { // guarda se vuoi string view C++ 17
+	// create the PAM file 
+	std::ofstream out(filename, std::ios::binary); // per non tradurre i \n 
+	if (!out) {
+		return false;
+	}
+	// insert the header of the pam file:
+	out << "P7\n";
+	out << "WIDTH " << img.cols() << "\n";
+	out << "HEIGHT " << img.rows() << "\n";
+	out << "DEPTH 3\n";
+	out << "MAXVAL 255\n";
+	out << "TUPLTYPE RGB\n";
+	out << "ENDHDR\n";
+
+	// write the raster --> scriviamo tutti i byte della nostra immagine 
+	// 1 metodo:
+	for (int r = 0; r < img.rows(); ++r)
+	{
+		for (int c = 0; c < img.cols(); ++c)
+		{
+			out.put(img(r, c)[0]);
+			out.put(img(r, c)[1]);
+			out.put(img(r, c)[2]);// put scrive un byte 
+		}
+	}
+	// 2 metodo:
+	//out.write(img.raw_data(), img.raw_size());
+
+	return true;
+}
+
+bool load_pam(mat<rgb> &img, const std::string& filename) {
 	std::ifstream is(filename, std::ios::binary);
 	if (!is)
 		return false;
@@ -182,6 +218,13 @@ int main(void) {
 
 	// flip del img
 	flip_inplace(img2);
+
+	// mirror -> fare lo swap delle colonne
+
+	// come getsiamo img rgb
+	mat<rgb> img3;
+	if (!load_pam(img3, "colored.pam"))
+		return -1;
 
 	return 1;
 }
