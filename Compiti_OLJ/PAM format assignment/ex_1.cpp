@@ -82,6 +82,22 @@ bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda 
 	return true;
 }
 
+
+// per essere più generici:
+template<typename T>
+
+void flip_inplace(mat<T>& img) {
+	using std::swap;
+	auto rows = img.rows();
+	for (int r = 0; r < rows /2; ++r)
+	{
+		for (int c = 0; c < img.cols(); ++c)
+		{
+			swap(img(r, c), img(rows - 1 - r, c));
+		}
+	}
+}
+
 bool load_pam(mat<uint8_t> &img, const std::string& filename) {
 	std::ifstream is(filename, std::ios::binary);
 	if (!is)
@@ -163,6 +179,9 @@ int main(void) {
 	load_pam(img2, "frog.pam");
 
 	save_pam(img2, "frog_flipped.pam");
+
+	// flip del img
+	flip_inplace(img2);
 
 	return 1;
 }
