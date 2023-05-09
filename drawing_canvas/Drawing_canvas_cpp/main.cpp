@@ -118,9 +118,14 @@ int main(void)
 	line *ln = new line(40, 15, 40, 20, '|', "linea1");
 
 	shape *arr[] = { rect, circ, ln};
-
+	
 	for (size_t i = 0; i < 3; ++i) {
 		arr[i]->draw(c);
+	}
+	// versione alternativa
+	for(sp in arr)
+	{
+		sp->draw(c);
 	}
 
 	c->out(stdout);
