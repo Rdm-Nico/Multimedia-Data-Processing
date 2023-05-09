@@ -157,7 +157,7 @@ void print_pieces(const ben::elem* e, size_t tab) {/* ricevo un elemento generic
 }
 /* invdce di usare i puntatorire e poi fare la delete, si puo provare a fare qualcosa di automatico:
 si deve fare il reference counter(guarda come funziona) 
-unice pointer e shared pointer( puntatori unice sono classi private che non può essere copiata. shared dice che )
+unique pointer e shared pointer( puntatori unice sono classi private che non può essere copiata. shared dice che )
 appena l'oggetto pointer esce dallo scope fa la delete
 
 si può evitare di fare i distuttori delle list e dei dict mettendo i puntatori unique pointer */

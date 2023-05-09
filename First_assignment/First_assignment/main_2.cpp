@@ -47,7 +47,7 @@ struct vector {
         for (size_t i = 0; i < n_; i++)
         {
             nums_[i] = other.nums_[i];
-            // la memcpy andava più forte perchè: usare accelerazione hardware più forti
+            // la memcpy andava piï¿½ forte perchï¿½: usare accelerazione hardware piï¿½ forti
         }
     }
 
@@ -88,8 +88,8 @@ struct vector {
     }
     // bisogna fare l'overloading per la funzione: due versione dello stesso metodo, ma sono due funzioni diverse
     /*
-        Una versione in cui non si può modificare il valore ritornato ( la seconda )
-        Una versione in cui si può utilizzare il valore ritornato( la prima)
+        Una versione in cui non si puï¿½ modificare il valore ritornato ( la seconda )
+        Una versione in cui si puï¿½ utilizzare il valore ritornato( la prima)
     */
     int32_t&  operator[](int i) { // ecco il nome speciale, definito dal linguaggio per sostituire at(i)
         return nums_[i];
@@ -106,7 +106,7 @@ void raddoppia(int& val) {
 
 void scrivi(FILE *F, const vector& v) {
     for (int i = 0; i < v.size(); i++) {
-        fprintf(fout, "%" PRId32 "\n", v[i])); 
+        fprintf(F, "%" PRId32 "\n", v[i]); 
     }
 }
 
@@ -123,14 +123,14 @@ int main(int argc, char* argv[])
 {
     /*numero* pn = (numero*)malloc(sizeof(numero));
     int q = pn->val_; // la malloc ritorna memoria e basta 
-    // serve una nuova modalità di allocare memoria 
-    Si utilizzerà:*/
+    // serve una nuova modalitï¿½ di allocare memoria 
+    Si utilizzerï¿½:*/
     numero* pn = new  numero;
     int q = pn->val_;
-    // non c'è la garbage collection --> si deve liberare la memoria 
+    // non c'ï¿½ la garbage collection --> si deve liberare la memoria 
     delete pn;
 
-    // la sintassi per allocare più di un oggetto insieme:
+    // la sintassi per allocare piï¿½ di un oggetto insieme:
     numero* pt = new  numero[10];
     
     delete[] pt;
@@ -172,11 +172,11 @@ int main(int argc, char* argv[])
     vector x = v; // FAIL! Shallow copy! 
 
     /*
-        NON si può scrivere:
+        NON si puï¿½ scrivere:
         vector y;
         x = v;
         PERCHE' ADESSO STIAMO ASSEGNANDO, NON PIU' INIZIALLIZANDO
-        farà una shallow copy !!! 
+        farï¿½ una shallow copy !!! 
     */
     vector y;
     y = v;
@@ -184,10 +184,10 @@ int main(int argc, char* argv[])
         A shallow copy of an object is a copy whose properties share the same references (point to the same underlying values)
         as those of the source object from which the copy was made.
         As a result, when you change either the source or the copy, 
-        you may also cause the other object to change too — and so, 
+        you may also cause the other object to change too ï¿½ and so, 
         you may end up unintentionally causing changes to the source or copy that you don't expect.  
     */    
-    /*NON SI PUO FARE v[0] = 5  , perchè deve essere una variabile --> essere un indirizzo di memoria, si inserisce una reference per farlo diventare un l-value*/
+    /*NON SI PUO FARE v[0] = 5  , perchï¿½ deve essere una variabile --> essere un indirizzo di memoria, si inserisce una reference per farlo diventare un l-value*/
 
 
     vector z;

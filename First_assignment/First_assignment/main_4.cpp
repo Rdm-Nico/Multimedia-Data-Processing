@@ -140,7 +140,7 @@ namespace mpd {
     };
 }
 
-void scrivi_vettore(FILE* f, const mdp:: vector<double>& v) {
+void scrivi_vettore(FILE* f, const mpd::vector<double>& v) {
     for (int i = 0; i < v.size(); i++) {
         fprintf(f, "%f\n", v[i]);
     }
@@ -155,12 +155,12 @@ struct esempio {
 
 auto crea_elementi(int x )
 {
-    mdp:: vector<esempio> a;
+    mpd:: vector<esempio> a;
     a.push_back(6);
     a.push_back(-9);
     a.push_back(23);
 
-    mdp:: vector<esempio> b;
+    mpd:: vector<esempio> b;
     b.push_back(6);
     b.push_back(-9);
     b.push_back(23);
@@ -178,9 +178,9 @@ auto crea_elementi(int x )
 int main(int argc, char* argv[])
 {
 
-    using mdp::vector; // e adesso posso usare solo vector 
+    using mpd::vector; // e adesso posso usare solo vector 
 
-    mdp:: vector<esempio> mio;
+    vector<esempio> mio;
 
     mio = crea_elementi(6);
 
