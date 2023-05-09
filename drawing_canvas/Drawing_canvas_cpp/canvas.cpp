@@ -6,7 +6,7 @@
 
 canvas::canvas(int width, int height)
 {
-    assert(width > 0 && height > 0);
+    assert(width > 0 && height > 0); // precondizione
     width_ = width;
     height_ = height;
     int size = width_ * height_;
@@ -18,7 +18,7 @@ canvas::~canvas()
     free(ptr_);
 }
 
-void canvas::set(int x, int y, char c) 
+void canvas::set(int x, int y, char c) // setta il carattere c nella posizione (x,y)    
 {
     if (x >= 0 && x < width_ && y >= 0 && y < height_)
         ptr_[y*width_ + x] = c;
@@ -26,6 +26,7 @@ void canvas::set(int x, int y, char c)
 
 void canvas::line(int x0, int y0, int x1, int y1, char c)
 {
+    //calcoliamo la distanza tra i due punti e la  sua direzione 
     int dx = abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
     int dy = -abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
     int err = dx + dy, e2; /* error value e_xy */
