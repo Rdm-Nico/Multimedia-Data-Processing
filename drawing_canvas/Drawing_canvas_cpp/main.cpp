@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#define MEM_DEBUG 
+#define MEM_DEBUG true
 #include <stdbool.h>
 
 #include "canvas.h"
@@ -122,7 +122,6 @@ int main(void)
 	for (size_t i = 0; i < 3; ++i) {
 		arr[i]->draw(c);
 	}
-	
 
 	c->out(stdout);
 
@@ -130,7 +129,7 @@ int main(void)
 		delete arr[i];
 	}
 	delete c;
-	if (MEM_DEBUG)
+	if (MEM_DEBUG == true)
 	{
 		_CrtDumpMemoryLeaks(); 	//controlla se ci sono memory leaks
 	}
