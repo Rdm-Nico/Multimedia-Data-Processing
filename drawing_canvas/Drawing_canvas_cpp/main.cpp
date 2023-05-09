@@ -1,10 +1,12 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define MEM_DEBUG 
 #include <stdbool.h>
 
 #include "canvas.h"
 #include "string.h"
-
+#ifdef MEM_DEBUG
 #include <crtdbg.h>
+#endif
 #include <stdlib.h>
 
 /*
@@ -127,6 +129,8 @@ int main(void)
 		delete arr[i];
 	}
 	delete c;
-
-	_CrtDumpMemoryLeaks();
+	if (MEM_DEBUG)
+	{
+		_CrtDumpMemoryLeaks(); 	//controlla se ci sono memory leaks
+	}
 }
