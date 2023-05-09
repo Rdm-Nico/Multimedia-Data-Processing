@@ -122,11 +122,7 @@ int main(void)
 	for (size_t i = 0; i < 3; ++i) {
 		arr[i]->draw(c);
 	}
-	// versione alternativa
-	for(sp in arr)
-	{
-		sp->draw(c);
-	}
+	
 
 	c->out(stdout);
 
