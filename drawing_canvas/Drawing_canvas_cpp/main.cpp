@@ -113,7 +113,7 @@ int main(void)
 {
 	canvas* c = new canvas(80, 25);
 
-	rectangle *rect = new rectangle(0, 0, 79, 24, '*', "rettangolo1");
+	rectangle *rect = new rectangle(0, 0, 79, 24, '~', "rettangolo1");
 	circle *circ = new circle(10, 10, 4, '@', "cerchio1");
 	line *ln = new line(40, 15, 40, 20, '|', "linea1");
 
