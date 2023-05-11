@@ -47,7 +47,8 @@ struct mat {
 	size_t raw_size()const {
 		return rows_ * cols_ * sizeof(T);
 	}
-	const char *raw_data()const {
+	 // adesso facciamoo un cast per vedere i dati come un array di char
+	const char *raw_data()const { // per non fare copie perchÃ© non vogliamo modificare i dati
 		return reinterpret_cast<const char *>(&data_[0]);
 	}
 };
@@ -83,7 +84,7 @@ bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda 
 }
 
 
-// per essere più generici:
+// per essere piï¿½ generici:
 template<typename T>
 
 void flip_inplace(mat<T>& img) {
