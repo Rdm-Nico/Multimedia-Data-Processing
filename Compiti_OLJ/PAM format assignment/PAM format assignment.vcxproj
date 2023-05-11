@@ -183,6 +183,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ex_1.cpp" />
+    <ClCompile Include="sol_clean.cpp" />
     <ClCompile Include="ex_2.cpp" />
     <ClCompile Include="ex_3.cpp" />
   </ItemGroup>

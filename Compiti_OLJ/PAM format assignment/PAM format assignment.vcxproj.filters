@@ -24,5 +24,8 @@
     <ClCompile Include="ex_3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sol_clean.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
