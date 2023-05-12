@@ -47,11 +47,11 @@ struct mat {
 	size_t raw_size()const {
 		return rows_ * cols_ * sizeof(T);
 	}
-	const char *raw_data()const {
-		return reinterpret_cast<const char *>(&data_[0]);
+	const char* raw_data()const {
+		return reinterpret_cast<const char*>(&data_[0]);
 	}
 };
-// sempre una const & perch� vogliamo non vogliamo una  copia 
+// sempre una const & perch  vogliamo non vogliamo una  copia 
 bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda se vuoi string view C++ 17
 	// create the PAM file 
 	std::ofstream out(filename, std::ios::binary); // per non tradurre i \n 
@@ -83,7 +83,7 @@ bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda 
 }
 
 
-// per essere pi� generici:
+// per essere pi  generici:
 template<typename T>
 
 void flip_inplace(mat<T>& img) {
@@ -140,7 +140,7 @@ bool load_pam(mat<rgb>& img, const std::string& filename) {
 		return false;
 
 	// dentro string c'ï¿½ getline
-	std:: string magic_number;
+	std::string magic_number;
 	std::getline(is, magic_number);
 	// fino a end token ci sono le varie righe  -> che possono essere inserite in ordine causale 
 	// dobbiamo fare un parser -> che legge le righe e le insrisce bene 

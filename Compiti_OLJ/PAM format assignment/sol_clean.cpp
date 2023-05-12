@@ -55,7 +55,7 @@ struct mat
 };
 
 
-// create a function con save a matrix in a file  in PAM format 
+// create a function that  save a matrix in a file  in PAM format 
 bool save_pam(const mat<uint8_t>& img, const std::string& filename) {
 	// use ofstream method for don't translet the '\n' 
 	std::ofstream out(filename, std::ios::binary);
@@ -158,6 +158,20 @@ bool load_pam(mat<uint8_t>& img, const std::string& filename)
 	return true;
 }
 
+// add a function that flip an img:
+template<typename T>
+void flip_inplace(mat<T>& img) {
+	using std::swap;
+	auto rows = img.rows();
+	for (int r = 0; r < rows/2; ++r)
+	{
+		for (int c = 0; c < img.cols(); ++c)
+		{
+			swap(img(r, c), img(rows - 1 - r, c));
+		}
+	}
+}
+
 int main(void) {
 
 	// create the matrix
@@ -176,6 +190,12 @@ int main(void) {
 
 	// 2 ex:
 	// is necessary to create a function that load a PAM file:
+	mat<uint8_t> img2;
+	load_pam(img2, "frog.pam");
+	// after we load the img we can flip it:
+	flip_inplace(img2);
+
+	save_pam(img2, "frog_flipped.pam");
 
 
 	return 1;
