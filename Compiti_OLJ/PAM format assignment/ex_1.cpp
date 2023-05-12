@@ -87,7 +87,7 @@ bool save_pam(const mat<uint8_t>& img, const std::string& filename) { // guarda 
 template<typename T>
 
 void flip_inplace(mat<T>& img) {
-	using std::swap;
+	using std::swap; // we use std::swap to swap two elements
 	auto rows = img.rows();
 	for (int r = 0; r < rows / 2; ++r)
 	{
