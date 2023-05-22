@@ -17,11 +17,11 @@ double entropy(vector<int16_t>& v) {
 int main(int argc, char* argv[]) {
 
 	// estrarre il file 
-
-	ifstream is("test.raw", std::ios::binary);
+	ifstream is("test.raw", ios::binary);
 
 	if (!is) {
 		cout << "error in the opening of the file\n";
+		return -1;
 	}
 	istream_iterator<int16_t> is_start(is);
 	istream_iterator<int16_t> stop;
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
 	cout << "the size of v is: " << v.size();
 
-	double entropia;
+	double entropia{ 0 };
 	entropia = entropy(v);
 
 
