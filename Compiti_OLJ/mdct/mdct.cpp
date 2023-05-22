@@ -11,6 +11,7 @@ using namespace std;
 
 double entropy(vector<int16_t>& v) {
 	// calcoliamo l'entropia
+	return 0;
 }
 
 int main(int argc, char* argv[]) {
@@ -29,7 +30,8 @@ int main(int argc, char* argv[]) {
 
 	cout << "the size of v is: " << v.size();
 
-	double entropy = entropy(v);
+	double entropia;
+	entropia = entropy(v);
 
 
 	return 0;
