@@ -183,6 +183,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="mdct.cpp" />
+    <ClCompile Include="Sol.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\Downloads\test.raw" />

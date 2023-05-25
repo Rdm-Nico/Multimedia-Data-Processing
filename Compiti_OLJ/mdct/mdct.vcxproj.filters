@@ -18,6 +18,9 @@
     <ClCompile Include="mdct.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sol.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\Downloads\test.raw" />
