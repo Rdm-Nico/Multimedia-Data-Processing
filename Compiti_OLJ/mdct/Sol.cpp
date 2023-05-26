@@ -11,15 +11,15 @@
 	diff tra v.resize() e v.reserve()
 	resize alloca la memoria e mette la v.size() alla dim del vettore interessato 
 
-	la reserve si limita ad allocare la memoria ma la v.size() è ancora a 0 
-	la reserve può essere utile con i cicli quando si utilizza la v.push_back() del vettore 
+	la reserve si limita ad allocare la memoria ma la v.size() ï¿½ ancora a 0 
+	la reserve puï¿½ essere utile con i cicli quando si utilizza la v.push_back() del vettore 
 	e si vuole aggiungere un elem alla volta 
 
 	se volete la RVO( return value optimization) dovete mettere un unico vettore nella funzione 
 	*/
 
 /*
-	il prof ha fatto un formato .wav così 
+	il prof ha fatto un formato .wav cosï¿½ 
 
 	calcolare l'entropia:
 	std::ranges::input_range auto &&range -> 
@@ -28,7 +28,7 @@
 
 	fare una mappa che a ogni valore associ in numero che volte che compare 
 	
-	*first è il primo elem della first e uso decltype ( type_of nel c++) e ooi facciamo una std::remove_reference toglie la reference -> con ::type  posso riceve il tipo di dato
+	*first ï¿½ il primo elem della first e uso decltype ( type_of nel c++) e ooi facciamo una std::remove_reference toglie la reference -> con ::type  posso riceve il tipo di dato
 	e uso un static cast della distance(first,last)
 
 	facciamo una mappa  di tipo e il count 
@@ -47,18 +47,18 @@
 	e poi bisogna quantizzare:
 	uso std::placeholder per creare una classe _1 
 	utilizzo std::trasform() che applica una funzione std::divide<int>{}, _1, Q 
-	e prendiamo la std::bind che  leghiamo la divide e facciamo il binding dei dei parametri _1 e Q -> è una funzione che accetta un solito 
+	e prendiamo la std::bind che  leghiamo la divide e facciamo il binding dei dei parametri _1 e Q -> ï¿½ una funzione che accetta un solito 
 
-	ma non è molto comodo da usare:
+	ma non ï¿½ molto comodo da usare:
 
 	si usa una funzione lambda 
-	[& -> piglia tutto come reference , se no si può usare direttamente Q](int val -> dove si istanziano i parametri){ 
+	[& -> piglia tutto come reference , se no si puï¿½ usare direttamente Q](int val -> dove si istanziano i parametri){ 
 			return val / Q;
 	}
-	si può anche dividere l'implementazione 
+	si puï¿½ anche dividere l'implementazione 
 
 
-	nel c++ c'è std::ranges nuovi tipi di algo basati su degli intervalli che sono reallizati tramite i "concetti" ( gli devi passare qualcosa che rispetti questi requisiti: avere begin() e end() ) 
+	nel c++ c'ï¿½ std::ranges nuovi tipi di algo basati su degli intervalli che sono reallizati tramite i "concetti" ( gli devi passare qualcosa che rispetti questi requisiti: avere begin() e end() ) 
 	
 	usiamo la copy 
 	con std::views:trasform permette di far diventare un operazione -> applico la funzione scritta dentro al trasform  ad ogni elemento di samples
@@ -77,7 +77,7 @@
 	partendo dalla posizione 1, trasformo la finestra corrente e alla fine ottengo gli N campioni 
 	e poi prev = move(curr)
 
-	questa versione fa scifo perchè è molto lenta 
+	questa versione fa scifo perchï¿½ ï¿½ molto lenta 
 */
 
 #define _USE_MATH_DEFINES
@@ -266,31 +266,36 @@ int main()
 	// quantize in time
 	if (true) {
 		double quant_fac = 2600;
-		auto quant_f = bind(quant<datatype>, _1, quant_fac);
-		auto dequant_f = bind(dequant<datatype>, _1, quant_fac);
+		auto quant_f = bind(quant<datatype>, _1, quant_fac); // quantize with factor 2600
+		auto dequant_f = bind(dequant<datatype>, _1, quant_fac); // dequantize with factor 2600
 
-		std::vector<datatype> quant_t(original.size());
+		std::vector<datatype> quant_t(original.size()); // apply quantization in all samples
 		transform(begin(original), end(original), begin(quant_t), quant_f);
 
 		std::cout << "Info su campioni quantizzati:\n";
 		print_freq(quant_t);
 
-		std::vector<datatype> recon(original.size());
+		std::vector<datatype> recon(original.size()); // apply dequantization in all samples
 		transform(begin(quant_t), end(quant_t), begin(recon), dequant_f);
 
-		write_track("output_qt.raw", recon);
+		write_track("output_qt.raw", recon); // write dequantized samples
 
 		// compute error
+        // difference between original and dequantized samples
 		std::vector<datatype> error(original.size());
 		for (size_t i = 0; i < original.size(); ++i)
 			error[i] = original[i] - recon[i];
+        
+        // potevi farlo anche con la trasform 
+        // take all the elements of original and recon and apply the minus operator to them and then store the result in error
+        std::transform(begin(original), end(original), begin(recon),begin(error), std::minus<datatype>());
 
 		write_track("error_qt.raw", error);
 	}
 
 	// quantize in frequency
 	if (true) {
-		double quant_fac = 20000;
+		double quant_fac = 10000;
 		auto quant_f = bind(quant<coefftype>, _1, quant_fac);
 		auto dequant_f = bind(dequant<coefftype>, _1, quant_fac);
 		// N is the number of coefficients
