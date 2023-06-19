@@ -186,10 +186,7 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="filein.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="fileout.bin" />
+    <Text Include="..\..\Second_assignment_v1\write_int11\filein.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

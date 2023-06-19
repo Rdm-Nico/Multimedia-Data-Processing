@@ -59,7 +59,7 @@ class bitwriter {
 int main(int argc, char* argv[]) {
 
 	if (argc != 3) {
-		std::cout << "Usage: write_int11 <filein.txt <fileout.bin\n";
+		std::cout << "Usage: write_int11 <filein.txt> <fileout.bin>\n";
 		return 1;
 	}
 
@@ -80,9 +80,6 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 
-	for (const auto& x : v) {
-		std::cout << x << "\n";
-	}
 
 	bitwriter bw(out);
 
