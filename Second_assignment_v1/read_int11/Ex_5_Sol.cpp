@@ -26,8 +26,8 @@ public:
                 raw_read(is_, buffer_);
                 n_ = 8;
             }
-            n_--; // decrementiamo 
-            return(buffer_ >> --n_) & 1; //
+            n_--; // decrementiamo perchè abbiamo letto un bit e lo abbiamo tolto dal buffer
+            return(buffer_ >> --n_) & 1; // ritorniamo il bit che ci interessa
         }
 
 
