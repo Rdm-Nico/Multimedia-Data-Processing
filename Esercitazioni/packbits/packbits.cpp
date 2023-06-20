@@ -97,7 +97,7 @@ uint8_t get_run_index(uint8_t c, const container& Container) {
 	container v = Container;
 	uint8_t index = 0;
 	bool flag = false;
-
+		
 	for (auto e : v) {
 		if (e == c && index < 128) {
 			index++;
