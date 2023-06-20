@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
 		bitreader br(is);
 		bitwriter bw(out);
 
-		vector<uint8_t> control(0);
+		vector<uint8_t> control(0); // vettore che viene utilizzato per controllare quanti caratteri di seguito ci sono 
 		char e = 0, curr = 0;
 		char past = 0;
 		size_t count = 0;
