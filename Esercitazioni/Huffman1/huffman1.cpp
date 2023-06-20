@@ -145,6 +145,23 @@ void printBT(const node* node)
 	printBT("", node, false);
 }
 
+void assign_code(map<char, string>& codes, node* node, string& seq) {
+	if (node) {
+
+		if (node->sym_ != '\0') {
+			codes[node->sym_] = seq;
+		}
+
+		seq.push_back('0');
+		assign_code(codes, node->left_, seq);
+		seq.pop_back();
+
+		seq.push_back('1');
+		assign_code(codes, node->right_, seq);
+		seq.pop_back();
+	}
+}
+
 
 int main(int argc, char* argv[]) {
 	if (argc != 4) {
@@ -218,7 +235,7 @@ int main(int argc, char* argv[]) {
 
 		node* root;
 
-		while (nodeptr_v.size() > 1) {
+		while (nodeptr_v.size() > 1) { // finche' non  ottengo un unico nodo dentro al vettore
 			sort(nodeptr_v.begin(), nodeptr_v.end(), nodePtrCompare); // ordiniamo il vettore
 
 			cout << endl << "v_size: " << nodeptr_v.size() << endl;
@@ -246,7 +263,108 @@ int main(int argc, char* argv[]) {
 
 		printBT(root);
 
+		map <char, string> huff_codes; // mappa per tenere i codici di huffman creati
 
+		string seq = "";
+		assign_code(huff_codes, root, seq);
+
+		cout << "codici di huffman:" << endl;
+		for (auto& it : huff_codes) {
+			cout << it.first << "\t" << it.second << endl;
+
+
+			bw(it.first, 8); // scriviamo il simbolo
+			uint32_t code_len = it.second.length();
+			bw(code_len, 5);
+
+			for (size_t i = 0; i < it.second.length(); i++) {
+				uint8_t bit = it.second.c_str()[i] - '0'; // viene selezionato il bit e viene convertito in un intero a 8 bit
+				cout << it.second.c_str()[i];
+				bw(bit, 1);
+			}
+			cout << endl;
+		}
+
+		bw(sum, 32); // numero di simboli 
+
+		// in questo modo evito di caricare un file su un vettore interamente 
+		in.clear();
+		in.seekg(0, in.beg); // beg :l'inizio di uno stream
+
+		while (in >> carattere) { // preleva il carattere dal file iniziale 
+			for (size_t i = 0; i < huff_codes[carattere].length(); i++)
+			{
+				uint8_t bit = huff_codes[carattere].c_str()[i] - '0';
+				cout << huff_codes[carattere].c_str()[i] << endl;
+				bw(bit, 1);
+			}
+			cout << endl;
+		}
+
+		break;
+	}
+	case 'd': {
+		// decompressione
+		ifstream in(argv[2], ios::binary);
+		ofstream out(argv[3], ios::binary);
+		if (!in || !out) {
+			return -1;
+		}
+		bitwriter bw(out);
+		bitreader br(in);
+
+		string magic_number;
+
+		while (magic_number.length() != 8) {
+			char c = br.read(8);
+			magic_number.push_back(c);
+		}
+		if (magic_number != "HUFFMAN1"){
+			cout << "errore nel file passato" << endl;
+		}
+
+		uint8_t table_entries = 0;
+
+		table_entries = br.read(8);
+
+		table_entries - table_entries == 0 ? 256 : table_entries;
+
+		cout << "entries: " << (uint32_t)table_entries << endl;
+
+		map<string, uint8_t> huffman_codes;
+
+		for (uint8_t  i = 0; i < table_entries; i++)
+		{
+			char sym = br.read(8);
+			uint8_t len = br.read(5);
+			string code = "";
+			for (uint8_t j = 0; j < len; j++) {
+				char bit = br.read(1);
+				code.push_back(bit + '0'); // prendere il numero intero 
+			}
+
+			huffman_codes.insert({ code, sym });
+		}
+
+		uint32_t numSyml = br.read(32);
+		vector<char> v;
+		string r_code = "";
+
+		for (uint32_t i = 0; i < numSyml;) {
+
+			uint8_t bit = br.read(1);
+			r_code.push_back(bit + '0');
+
+			if (huffman_codes.count(r_code) == 1) { // conferma la condizione quando la chiave (r_code) e' stata trovata
+				cout << (char)huffman_codes[r_code] << endl;
+				out << huffman_codes[r_code];
+				r_code = ""; // resettiamo per il prossimo 
+				i++;
+			}
+		}
+
+
+		break;
 	}
 	default:
 		cout << "Usage [c,d]" << endl;
