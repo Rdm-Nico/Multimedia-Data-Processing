@@ -108,7 +108,7 @@ class bitreader {
 
 		uint32_t read(uint8_t num) {
 			uint32_t u = 0;
-			while (n_--> 0) {
+			while (num--> 0) {
 				u = (u << 1) | read_bit();
 			}
 			return u;
@@ -194,14 +194,14 @@ int main(int argc, char* argv[]) {
 		while (1) {
 			uint32_t zeros_read = 0; // lettura degli zeri
 			uint32_t sx_value = 0;
-			uint8_t r = 0;
+			uint8_t read_bit = 0;
 
 			if (!br)
 				break;
 
-			while (r != 1) {
-				r = br.read_bit();
-				if (r == 0) {
+			while (read_bit != 1) {
+				read_bit = br.read_bit();
+				if (read_bit == 0) {
 					zeros_read++; // conto gli zeri
 				}
 			}
@@ -210,8 +210,7 @@ int main(int argc, char* argv[]) {
 			uint32_t dx_value = br.read(zeros_read);
 			uint32_t fin_value = sx_value + dx_value;
 			
-			cout << fin_value;
-
+			
 			v_to_map.push_back(fin_value);
 		}
 
