@@ -235,6 +235,7 @@ int main(int argc, char* argv[]) {
 
 		node* root;
 
+
 		while (nodeptr_v.size() > 1) { // finche' non  ottengo un unico nodo dentro al vettore
 			sort(nodeptr_v.begin(), nodeptr_v.end(), nodePtrCompare); // ordiniamo il vettore
 
