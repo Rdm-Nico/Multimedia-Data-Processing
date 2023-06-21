@@ -14,7 +14,7 @@
 
 template< typename T>
 void saturate(T& value, const uint8_t& min_value, const uint8_t& max_value) {
-	
+
 	value = value < min_value ? min_value : value > max_value ? max_value : value; // satura gli elementi che sono piu' bassi della soglia e quelli che sono piu' alti della soglia 
 }
 
@@ -31,7 +31,7 @@ void compute_upsampling(mat<vec3b>& frame, std::vector<mat<uint8_t>>& YCbCr) {
 	for (int r = 0; r < frame.rows(); r++) {
 		for (int c = 0; c < frame.cols(); c++) {
 			pix[0] = YCbCr[0](r, c);
-			pix[1] = YCbCr[1](r/2, c/2); // prendiamo la posizione dimezzata 
+			pix[1] = YCbCr[1](r / 2, c / 2); // prendiamo la posizione dimezzata 
 			pix[2] = YCbCr[2](r / 2, c / 2);
 
 			saturate(pix[0], 16, 235);
@@ -44,7 +44,7 @@ void compute_upsampling(mat<vec3b>& frame, std::vector<mat<uint8_t>>& YCbCr) {
 
 			pp_pix[0] = (1164 * pix[0] + 1596 * pix[2]) / 1000;
 			pp_pix[1] = (1164 * pix[0] - 392 * pix[1] - 813 * pix[2]) / 1000;
-			pp_pix[2] = (1164 * pix[0] + 2017* pix[1]) / 1000;
+			pp_pix[2] = (1164 * pix[0] + 2017 * pix[1]) / 1000;
 
 			for (auto& e : pp_pix)
 				saturate(e, 0, 255);
@@ -64,10 +64,7 @@ bool Test_Magic_Number(std::ifstream& is, const std::string& magic) {
 
 	std::string word;
 	is >> word;
-	if (word != magic) {
-		return false;
-	}
-	return true;
+	return word == magic;
 }
 
 bool Read_Header(std::ifstream& in, std::map<uint8_t, std::string>& header) {
@@ -80,8 +77,11 @@ bool Read_Header(std::ifstream& in, std::map<uint8_t, std::string>& header) {
 		return false;
 	}
 
+	string chroma = "420jpeg";
 	string v;
 	const char tags[] = { 'W','H','C','I','F','A','X' };
+
+	header['C'] = "420jpeg";
 
 	// incominciamo a leggere header
 	while (true) {
@@ -91,22 +91,27 @@ bool Read_Header(std::ifstream& in, std::map<uint8_t, std::string>& header) {
 		if (c == '\n') { // fine dell'header
 			break;
 		}
-		if (c == ' ') {
-			flag = true;
+
+		if (c != ' ') {
+			return false;
 		}
 
-		if (flag) {
-			// se abbiamo trovato uno spazio
-			c = in.get();
-			for (auto e : tags) {
-				if (c == e) {
-					in >> v;
-					header[e] = v;
-					break;
-				}
+		// se abbiamo trovato uno spazio
+		char tag = in.get();
+		for (auto e : tags) {
+			if (tag == e) {
+				flag = true;
 			}
 		}
+		if (!flag) {
+			return false;
+		}
+		in >> v;
+		header[tag] = v;
 	}
+
+	if (header.count('W') != 1 || header.count('H') != 1)
+		return false;
 
 	int H = stoi(header['H']);
 	int W = stoi(header['W']);
@@ -127,7 +132,6 @@ bool Read_Frames(std::ifstream& is, std::map<uint8_t, std::string>& header, std:
 		4. 144*176 elem di Cb e Cr
 	*/
 
-	string frame_number;
 	string interlacing, application;
 
 	int H = stoi(header['H']);
@@ -139,43 +143,42 @@ bool Read_Frames(std::ifstream& is, std::map<uint8_t, std::string>& header, std:
 
 	while (true)
 	{
-	
+		string frame_number;
+
 		if (is.fail())
 			return false;
-		
+
 		if (is.eof())
 			break;
 
 
 		is >> frame_number;
 
-		if (frame_number != "FRAME")
-			return false;
+		if (frame_number != "FRAME") 
+			return true; // perche' siamo alla fine del file 
 
 		// leggiamo l'header
 		while (true) {
-			bool flag = false;
 			char c = is.get();
 
 			if (c == '\n') { // fine dell'header
 				break;
 			}
-			if (c == ' ') {
-				flag = true;
+			if (c != ' ') {
+				return false;
 			}
 
-			if (flag) {
-				char tag = is.get();
-				switch (tag)
-				{case 'I':
-					is >> interlacing;
-					break;
-				case 'X':
-					is >> application;
-					break;
-				default:
-					return false;
-				}
+			char tag = is.get();
+			switch (tag)
+			{
+			case 'I':
+				is >> interlacing;
+				break;
+			case 'X':
+				is >> application;
+				break;
+			default:
+				return false;
 			}
 		}
 
@@ -215,15 +218,15 @@ bool y4m_extract_color(const std::string& filename, std::vector<mat<vec3b>>& fra
 		return false;
 	}
 	map<uint8_t, string> header;
-	
+
 	if (!Read_Header(in, header)) {
 		return false;
 	}
-	
+
 	if (!Read_Frames(in, header, frames)) {
 		return false;
 	}
-	
+
 	return true;
 }
 
