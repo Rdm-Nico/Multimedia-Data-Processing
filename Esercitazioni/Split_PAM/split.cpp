@@ -80,7 +80,7 @@ bool load_pam(std::ifstream& is, mat<rgb>& img) {
 		if (token == "WIDTH") {
 			ss >> w;
 		}
-		else if (token == "EIGHT") {
+		else if (token == "HEIGHT") {
 			ss >> h;
 		}
 		else if (token == "DEPTH") {
@@ -95,7 +95,7 @@ bool load_pam(std::ifstream& is, mat<rgb>& img) {
 			if (maxval != 255)
 				return false;
 		}
-		else if (token == "TUPLETYPE") {
+		else if (token == "TUPLTYPE") {
 			string tupletype;
 			ss >> tupletype;
 			if (tupletype != "RGB")
@@ -117,15 +117,55 @@ bool load_pam(std::ifstream& is, mat<rgb>& img) {
 
 		}
 	}
-
-	
+	return true;
 }
 
 
+void move_data(mat<rgb>& img, mat<uint8_t> plane, int index) {
+	// adesso dobbiamo inserire gli elementi dentro alla matrice 
+	for (int r = 0; r < img.rows(); ++r) {
+		for (int c = 0; c < img.cols(); ++c) {
+			 plane(r,c) = img(r, c)[index];
+		}
+	}
+}
+
+bool split_img(mat<rgb>& img, std::vector<mat<uint8_t>>& planes) {
+
+	// si impostano le stesse dimensioni per ogni piano:
+	for (int i = 0; i < 3; i++) {
+		planes[i].resize(img.rows(), img.cols());
+	}
+
+	// per ogni plane ora dobbiamo inserire i dati
+	for (int i = 0; i < 3; i++) {
+		move_data(img, planes[i], i);
+	}
+	return true;
+}
+
+bool save_pam(std::string filename, mat<uint8_t> img) {
+	using namespace std;
+
+	ofstream os(filename, ios::binary);
+	if (!os) {
+		return false;
+	}
+	os << "P7\n";
+	os << "WIDTH " << img.cols() << "\n";
+	os << "EIGHT " << img.rows() << "\n";
+	os << "DEPTH 1\n" ;
+	os << "MAXVAL 255\n";
+	os << "TUPLETYPE GRAYSCALEN\n";
+	os << "ENDHDR";
+
+	os.write(img.raw_data(), img.raw_size());
+
+	return true;
+}
 
 bool split(std::string filename) {
 	using namespace std;
-
 
 	ifstream is(filename, std::ios::binary);
 	if (!is) {
@@ -137,6 +177,70 @@ bool split(std::string filename) {
 	if (!load_pam(is, img)) {
 		return EXIT_FAILURE;
 	}
+	
+	// vettori dei piani R G e B
+
+	vector<mat<uint8_t>> planes;
+	for (size_t i = 0; i < 3; i++) {
+		mat<uint8_t> p;
+		planes.push_back(p);
+	}
+
+	if (!split_img(img, planes)) {
+		return EXIT_FAILURE;
+	}
+	// le salviamo in formato pam grayscale
+	char letter[] = {'R','G','B'};
+
+	stringstream stringa;
+	stringstream nuova;
+	stringa << filename;
+	char c;
+	while (1) {
+		stringa >> c;
+		if (c == '.')
+			break;
+		nuova.put(c);
+	}
+	nuova.put('_');
+
+	string ext = ".pam";
+	
+	stringstream r; 
+	r << nuova.str();
+	stringstream g;
+	g << nuova.str();
+	stringstream b;
+	b << nuova.str();
+
+	r.put(letter[0]);
+	g.put(letter[1]);
+	b.put(letter[2]);
+
+	r << ext;
+	g << ext;
+	b << ext;
+
+	save_pam(r.str(), planes[0]);
+	save_pam(g.str(), planes[1]);
+	save_pam(b.str(), planes[2]);
+
+	/*vector<stringstream> vec_file;
+	vec_file.push_back(r);
+	vec_file.push_back(g);
+	vec_file.push_back(b);
+
+	for (int i = 0; i < 3; i++) {
+		vec_file[i].put(letter[i]);
+		vec_file[i] << ext;
+		if (!save_pam(vec_file[i].str(), planes[i]))
+			return false;
+		//nuova.seekp(7);
+		//nuova;
+		//nuova << copia.str();
+	}
+	*/
+	return true;
 }
 
 
