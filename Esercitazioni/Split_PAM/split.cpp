@@ -121,7 +121,7 @@ bool load_pam(std::ifstream& is, mat<rgb>& img) {
 }
 
 
-void move_data(mat<rgb>& img, mat<uint8_t> plane, int index) {
+void move_data(mat<rgb>& img, mat<uint8_t>& plane, int index) {
 	// adesso dobbiamo inserire gli elementi dentro alla matrice 
 	for (int r = 0; r < img.rows(); ++r) {
 		for (int c = 0; c < img.cols(); ++c) {
@@ -130,21 +130,25 @@ void move_data(mat<rgb>& img, mat<uint8_t> plane, int index) {
 	}
 }
 
-bool split_img(mat<rgb>& img, std::vector<mat<uint8_t>>& planes) {
+std::string strRemoveExt(std::string filename, char del) {
+	// elimina gli elemeti dopo del(compreso del)
 
-	// si impostano le stesse dimensioni per ogni piano:
-	for (int i = 0; i < 3; i++) {
-		planes[i].resize(img.rows(), img.cols());
-	}
+	std::string ret;
 
-	// per ogni plane ora dobbiamo inserire i dati
-	for (int i = 0; i < 3; i++) {
-		move_data(img, planes[i], i);
+	std::stringstream ss(filename);
+	char x;
+	while (true) {
+		ss >> x;
+		if (x == del) {
+			break;
+		}
+		ret.push_back(x);
+
 	}
-	return true;
+	return ret;
 }
 
-bool save_pam(std::string filename, mat<uint8_t> img) {
+bool save_pam(const std::string& filename, const mat<uint8_t>& img) {
 	using namespace std;
 
 	ofstream os(filename, ios::binary);
@@ -153,16 +157,40 @@ bool save_pam(std::string filename, mat<uint8_t> img) {
 	}
 	os << "P7\n";
 	os << "WIDTH " << img.cols() << "\n";
-	os << "EIGHT " << img.rows() << "\n";
-	os << "DEPTH 1\n" ;
+	os << "HEIGHT " << img.rows() << "\n";
+	os << "DEPTH 1\n";
 	os << "MAXVAL 255\n";
-	os << "TUPLETYPE GRAYSCALEN\n";
-	os << "ENDHDR";
+	os << "TUPLTYPE GRAYSCALE\n";
+	os << "ENDHDR\n";
 
 	os.write(img.raw_data(), img.raw_size());
 
 	return true;
 }
+
+bool split_img(std::string filename,mat<rgb>& rgb_img,mat<uint8_t>& plane, uint8_t i) {
+	using namespace std;
+
+	plane.resize(rgb_img.rows(), rgb_img.cols());
+
+
+	// per ogni plane ora dobbiamo inserire i dati
+	
+	move_data(rgb_img, plane, i);
+
+	stringstream plane_filename;
+
+	char x = i == 0 ? 'R' : i == 1 ? 'G' : 'B';
+
+	plane_filename << strRemoveExt(filename, '.') << "_" << x << ".pam";
+
+	save_pam(plane_filename.str(), plane);
+
+
+	return true;
+}
+
+
 
 bool split(std::string filename) {
 	using namespace std;
@@ -180,12 +208,14 @@ bool split(std::string filename) {
 	
 	// vettori dei piani R G e B
 
-	vector<mat<uint8_t>> planes;
+	vector<mat<uint8_t>> planes(3);
+
 	for (size_t i = 0; i < 3; i++) {
-		mat<uint8_t> p;
-		planes.push_back(p);
+		planes[i] = mat<uint8_t>();
+		split_img(filename, img, planes[i], i);
 	}
 
+	/*
 	if (!split_img(img, planes)) {
 		return EXIT_FAILURE;
 	}
@@ -225,7 +255,7 @@ bool split(std::string filename) {
 	save_pam(g.str(), planes[1]);
 	save_pam(b.str(), planes[2]);
 
-	/*vector<stringstream> vec_file;
+	vector<stringstream> vec_file;
 	vec_file.push_back(r);
 	vec_file.push_back(g);
 	vec_file.push_back(b);
