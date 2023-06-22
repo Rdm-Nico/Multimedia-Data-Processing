@@ -348,7 +348,6 @@ int main(int argc, char* argv[]) {
 		}
 
 		uint32_t numSyml = br.read(32);
-		vector<char> v;
 		string r_code = "";
 
 		for (uint32_t i = 0; i < numSyml;) {

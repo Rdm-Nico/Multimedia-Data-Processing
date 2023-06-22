@@ -1,3 +1,4 @@
+#include<cstdint>
 #include<fstream>
 #include<vector>
 #include<iterator>
@@ -5,8 +6,9 @@
 #include<iomanip>
 #include<iostream>
 #include<cmath>
-#include<deque>
 #include<algorithm>
+#include<bitset>
+#include<functional>
 
 
 template<typename T>
@@ -20,10 +22,10 @@ private:
 	int n_ = 0;
 	std::ostream& os_;
 
-	std::ostream& write_bit(bool bit) {
+	std::ostream& write_bit(uint8_t bit) {
 		
 		buffer_ = (buffer_ << 1) | bit;
-		n_++;
+		++n_;
 		if (n_ == 8) {
 			raw_write(os_, buffer_);
 			n_ = 0;
@@ -38,15 +40,15 @@ public:
 		flush();
 	}
 
-	void flush(bool n_bit = 0) {
+	void flush(uint8_t n_bit = 0) {
 		while (n_ > 0) {
 			write_bit(n_bit);
 		}
 	}
 
 	std::ostream& write(uint32_t num, uint8_t n_bit) {
-		for (uint8_t i = n_bit - 1; i >= 0; --i) {
-			bool cure_bit = (num >> i) & 1;
+		for (int i = n_bit - 1; i >= 0; --i) {
+			uint8_t cure_bit = (num >> i) & 1;
 			write_bit(cure_bit);
 		}
 		return os_;
@@ -298,7 +300,7 @@ bool compression(std::ifstream& in, std::ofstream& out) {
 
 	// questa sort permtte di fare il confronto tra due stringhe tramite la loro lunghezza, con una lambda function 
 	sort(sorted_huff_codes.begin(), sorted_huff_codes.end(), [](const pair<char, string>& a, const pair<char, string>& b) {
-		return a.second.length() > b.second.length();
+		return a.second.length() < b.second.length();
 		});
 
 	cout << "vettore di Huffman ordinato: " << endl;
@@ -311,7 +313,7 @@ bool compression(std::ifstream& in, std::ofstream& out) {
 
 	string code = ""; // nuovo codice  per huffman canonico
 
-	for (vector<pair<char, string>>::iterator it = sorted_huff_codes.begin(); it != sorted_huff_codes.end(); it++) {
+	for (vector<pair<char, string>>::iterator it = sorted_huff_codes.begin(), it_n = ++sorted_huff_codes.begin(); it != sorted_huff_codes.end(); it++) {
 
 		// assegna i codici di huffman canonici ai simboli ordinati
 		while (code.length() < it->second.length()) {
@@ -327,7 +329,7 @@ bool compression(std::ifstream& in, std::ofstream& out) {
 	for (auto& it : canonical_huff_codes) {
 		cout << it.first << "\t" << it.second << endl;
 		// scriviamo sul file il simbolo 
-		bw(static_cast<uint8_t>(it.first), 8);
+		bw((uint8_t)it.first, 8);
 		uint8_t len = it.second.length();
 
 		bw(len, 5);
@@ -359,8 +361,97 @@ bool compression(std::ifstream& in, std::ofstream& out) {
 	return true;
 }
 
-bool decompression(std::ifstream& is, std::ofstream& out) {
+
+void calc_codes(std::vector<std::pair<uint8_t, char>>& v, std::map<std::string, char> codes) {
+	// a 1 ==> a = 0
+	// b 2 ==> b = 10
+	// c 3 ==> c = 110
+	// d 4 ==> d = 1110
+	// e 3 ==> e = 110
+	std::string	seq = "";
+
+
+	for (size_t i = 0; i < v.size(); i++) {
+		
+		while (seq.length() < v[i].first) {
+			seq += "0";
+		}
+		codes[seq] = v[i].second;
+
+		
+	}
+}
+
 	
+
+
+bool decompression(std::ifstream& is, std::ofstream& out) {
+	using namespace std;
+	
+	string magic_number;
+	bitreader br(is);
+
+	while (magic_number.length() != 8) {
+		char c = br.read(8);
+		magic_number.push_back(c);
+	}
+
+	if(magic_number != "HUFFMAN2"){
+		cout << "Wrong binary file" << endl;
+		return false;
+	}
+
+	uint8_t Table_Entries = br.read(8);
+
+	Table_Entries = Table_Entries == 0 ? 256 : Table_Entries;
+
+	cout << "entries: " << (uint32_t)Table_Entries << endl;
+
+	map<uint32_t, pair<uint8_t, char>> huffman_codes; // mappa che contiene la lunghezza del codice e il suo simbolo associato
+
+	vector<pair<uint8_t, char>> huff_vec(Table_Entries);
+
+	for (uint8_t i = 0; i < Table_Entries; i++) {
+		char sym = br.read(8);
+		uint8_t len = br.read(5);
+		huffman_codes[len] = { len,sym }; // pero' cosi quando due codici avranno la stessa lunghezza il secondo si sovrascrive al primo 
+		huff_vec[i] = { len,sym };
+	}
+
+	// e necessario creare i codici canonici prima di leggere:
+	// avendo il carattere, la sua lunghezza e da dove partire  si possono calcolare
+
+	map<string, char> codes;
+	calc_codes(huff_vec, codes);
+
+	uint32_t NumSyms = br.read(32);
+	vector<char> v;
+
+	string r_code = "";
+
+	for (uint32_t i = 0; i < NumSyms;) {
+
+		uint8_t bit = br.read_bit();
+
+		r_code.push_back(bit + '0');
+		uint32_t lung = r_code.length();
+
+		for (size_t j = 0; j < huff_vec.size(); j++) {
+			if (huff_vec[j].first == lung) {
+
+			}
+		}
+
+		if (huffman_codes.count(lung) == 1) {
+			cout << huffman_codes[lung].second << endl;// stampiamo il carattere
+			out << huffman_codes[lung].second;  
+			r_code = "";
+			i++;
+		}
+	}
+
+
+
 	return true;
 }
 
