@@ -187,6 +187,7 @@
   <ItemGroup>
     <Text Include="..\..\..\..\..\..\Downloads\compressme1.txt" />
     <Text Include="..\..\..\..\..\..\Downloads\compressme3.txt" />
+    <Text Include="compressme4.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\Downloads\compressed1.bin" />

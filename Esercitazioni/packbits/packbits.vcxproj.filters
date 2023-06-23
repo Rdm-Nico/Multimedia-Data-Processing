@@ -26,6 +26,9 @@
     <Text Include="..\..\..\..\..\..\Downloads\compressme3.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="compressme4.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\..\..\Downloads\compressed1.bin">
