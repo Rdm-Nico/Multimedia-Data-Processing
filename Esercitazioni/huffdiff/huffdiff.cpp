@@ -96,8 +96,11 @@ public:
 };
 
 
-bool load_pam(ifstream& is, mat<uint8_t>& img) {
+bool load_pam(const string& filename, mat<uint8_t>& img) {
 
+	ifstream is(filename, ios::binary);
+	if (!is)
+		return false;
 	string magic_number;
 
 	getline(is, magic_number);
@@ -173,159 +176,6 @@ bool save_pam(const string& filename,const  mat<uint8_t>& img) {
 
 }
 
-template <typename T,typename D>
-struct huffdiff {
-	mat<T>& img_I_;
-	mat<T> img_diff_;
-	map<uint16_t, double> mapped_freq_;
-
-	huffdiff(mat<T>& img) : img_I_(img) {
-		img_diff_.resize(img.rows(), img.cols());
-	}
-
-
-	void compute_diff_mat() {
-		int prev = 0;
-
-		for (int r = 0; r <= img_I_.rows(); ++r) {
-			for (int c = 0; c <= img_I_.cols(); ++c) {
-				img_diff_(r, c) = img_I_(r, c) - prev;
-				prev = img_I_(r, c);
-			}
-			prev = img_I_(r, 0);
-		}
-
-		/*
-		for (int r = 0; r < img_I_.rows(); r++) {
-			for (int c = 0; r < img_I_.cols(); c++) {
-				if (r == 0 && c == 0) {
-					img_diff_(r, c) = img_I_(r, c);
-				}
-				else if (c == 0)
-				{
-					img_diff_(r, c) = img_I_(r, c) - img_I_(r - 1, c);
-				}
-
-				/*else if (r == 0) {
-					img_diff_(r, c) = img_I_(0, c) - img_I_(0, c - 1);
-				}
-							
-				else {
-					img_diff_(r, c) = img_I_(0, c) - img_I_(0, c - 1);
-				}
-				
-			}
-			cout << "riga numero " << r << endl;
-		}
-		*/
-	}
-
-	
-
-	struct code {
-		D sym_;
-		uint32_t len_, val_;
-	};
-
-	vector<code> codes_table_;
-
-	struct node {
-		D sym_;
-		size_t prob_;
-
-		node* left_ = nullptr;
-		node* right_ = nullptr;
-
-		node(const D& sym, size_t prob) : sym_(sym), prob_(prob) {}
-
-		node(node* a, node* b) {
-			sym_ = 0;
-			prob_ = a->prob_ + b->prob_;
-			left_ = a;
-			right_ = b;
-		}
-
-
-	};
-
-
-	void compute_freq() {
-		for (auto& x : img_diff_) {
-			mapped_freq_[x]++;
-		}
-	}
-
-
-
-	void create_table() {
-		vector<node*> v;
-
-		for (auto& x : mapped_freq_) {
-			node* n = new node(x.first, x.second);
-			v.push_back(n);
-		}
-
-		sort(v.begin(), v.end(), [](node* a, node* b) {
-			return a->prob_ > b->prob_;
-			});
-
-		// codifichiamo
-		while (v.size() > 1) {
-			node* n1 = v.back();
-			v.pop_back();
-			node* n2 = v.back();
-			v.pop_back();
-
-			node* n = new node(n1, n2);
-
-			// inserimento ordinato
-			auto it = lower_bound(v.begin(), v.end(), n, [](node* a, node* b) {
-				return a->prob_ > b->prob_;
-				});
-			v.insert(it, n);
-		}
-
-		node* root = v.front();
-
-		compute_lengths(root, 0);
-
-		sort(codes_table_.begin(), codes_table_.end(), [](auto& p1, auto& p2) {
-			return p2.len_ > p1.len_;
-			});
-
-		// mostriamo se vogliamo 
-		for (auto& e : codes_table_) {
-			cout << e.sym_ << "\t" << e.len_ << endl;
-		}
-	}
-
-	void compute_lengths(node* p, uint32_t len) {
-		if (p->left_ == nullptr) {
-			D s = p->sym_;
-			code x = { s,len,0 };
-
-
-			codes_table_.push_back(x);
-		}
-		else {
-			compute_lengths(p->left_, len + 1);
-			compute_lengths(p->right_, len + 1);
-		}
-	}
-
-	void compute_canonical_codes() {
-		uint32_t curr_len = 0, curr_val = 0;
-
-		for (auto& e : codes_table_) {
-			e.val_ = curr_val <<= (e.len_ - curr_len);
-
-			curr_len = e.len_;
-			curr_val++;
-		}
-	}
-
-};
-
 
 
 mat<int> calc_diffm(mat<uint8_t>& m) {
@@ -371,17 +221,10 @@ mat<uint8_t> calc_viewable_diffm(mat<int>& diffm) {
 }
 
 bool compressed(const string& file_in, const string& file_out){
-	ifstream is(file_in, ios::binary);
-	ofstream os(file_out, ios::binary);
-
-	if (!is || !os) {
-		cout << "error in the opening of the files" << endl;
-		return false;
-	}
 
 	mat<uint8_t> img;
 
-	if (!load_pam(is, img)) {
+	if (!load_pam(file_in, img)) {
 		cout << "error in load the pam file" << endl;
 		return false;
 	}
