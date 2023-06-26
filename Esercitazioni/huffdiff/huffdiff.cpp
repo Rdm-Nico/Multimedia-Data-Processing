@@ -121,7 +121,7 @@ public:
 	bitwriter(ostream& os): os_(os){}
 
 	ostream& write(uint32_t num, uint8_t n_bit) {
-		for (size_t i = n_bit - 1; i >= 0; --i) {
+		for (int i = n_bit - 1; i >= 0; --i) {
 			uint8_t cure_bit = (num >> i) & 1;
 			write_bit(cure_bit);
 		}
@@ -201,6 +201,8 @@ bool load_pam(const string& filename, mat<uint8_t>& img) {
 			img(r, c) = is.get();
 		}
 	}
+	// alternativa
+	//is.read(img.raw_data(), img.raw_size());
 
 	return true;
 }
@@ -278,7 +280,7 @@ mat<uint8_t> calc_viewable_diffm(mat<int>& diffm) {
 
 
 
-bool generate_huffdiff(mat<int> mdiff, const string out_filename, huffman<int>& h) {
+bool generate_huffdiff(mat<int> mdiff, const string& out_filename, huffman<int>& h) {
 	ofstream os(out_filename, ios::binary);
 	if (!os)
 		return false;
@@ -296,7 +298,7 @@ bool generate_huffdiff(mat<int> mdiff, const string out_filename, huffman<int>& 
 	raw_write(os, r);
 
 	// scrivo i numeri di elem della Table entries
-	bw.write(h.codes_table_.size(), 9);
+	bw.write(static_cast<uint32_t>(h.codes_table_.size()), 9);
 
 	// scriviamo la table entries
 	for (const auto& e : h.codes_table_) {
@@ -304,6 +306,7 @@ bool generate_huffdiff(mat<int> mdiff, const string out_filename, huffman<int>& 
 		bw(e.len_, 5);
 	}
 
+	/*
 	// codifichiamo seguendo la tabella 
 	for (size_t r = 0; r < mdiff.rows(); r++) {
 		for (size_t c = 0; c < mdiff.cols(); c++) {
@@ -326,9 +329,20 @@ bool generate_huffdiff(mat<int> mdiff, const string out_filename, huffman<int>& 
 				cout << "error " << " " << mdiff(r, c) << endl;
 			}
 		}
-	}
-	return true;
+		*/
 
+		// un idea migliore potrebbe essere utilizzare una search map:
+		unordered_map<int, huffman<int>::code> search_map;
+		for (const auto& x : h.codes_table_) {
+			search_map[x.sym_] = x;
+		}
+
+		for (const auto& x : mdiff) {
+			auto hc = search_map[x];
+			bw(hc.val_, hc.len_);
+		}
+
+	return true;
 }
 
 
