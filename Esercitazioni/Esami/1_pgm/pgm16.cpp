@@ -2,8 +2,9 @@
 #include "pgm16.h"
 
 
-int main(void) {
 
+
+int main(void) {
 
 	mat<uint8_t> img;
 	uint16_t maxvalue;
