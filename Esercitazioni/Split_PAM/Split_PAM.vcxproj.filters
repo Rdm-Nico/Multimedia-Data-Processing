@@ -26,5 +26,8 @@
     <None Include="..\..\..\..\..\..\Downloads\frog_rgb.pam">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="urbino-5180.pam">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

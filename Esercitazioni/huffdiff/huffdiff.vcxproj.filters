@@ -26,6 +26,12 @@
     <None Include="..\..\..\..\..\..\Downloads\laptop.pam">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="urbino-5180.pam">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="urbino-5180_G.pam">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="huffman.h">
