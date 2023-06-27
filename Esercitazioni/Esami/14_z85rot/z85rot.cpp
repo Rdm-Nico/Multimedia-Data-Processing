@@ -372,6 +372,7 @@ int main(int argc, char* argv[]) {
 		error("error in passing the mod chararcher: only [c|d] allowed\n");
 		break;
 	}
+	/*test per github*/
 
 	return EXIT_SUCCESS;
 }
