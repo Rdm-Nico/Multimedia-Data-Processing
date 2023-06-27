@@ -10,7 +10,6 @@
 #include<iomanip>
 #include<array>
 #include<cstdint>
-#include<streambuf>
 #include<string>
 
 using namespace std;
@@ -18,7 +17,7 @@ using namespace std;
 
 
 template<typename T>
-streambuf& raw_read(streambuf& is, T& val, size_t size = sizeof(T)) {
+istream& raw_read(istream& is, T& val, size_t size = sizeof(T)) {
 	return is.read(reinterpret_cast<char*>(&val), size);
 }
 
@@ -41,11 +40,11 @@ public:
 	}
 
 	T& operator()(int r, int c) {
-		assert(r > 0 && r < rows_ && c > 0 && c < cols_);
+		assert(r >= 0 && r < rows_ && c >= 0 && c < cols_);
 		return data_[r * cols_ + c];
 	}
 	const T& operator()(int r, int c) const  {
-		assert(r > 0 && r < rows_ && c > 0 && c < cols_);
+		assert(r >= 0 && r < rows_ && c >= 0 && c < cols_);
 		return data_[r * cols_ + c];
 	}
 
@@ -74,11 +73,12 @@ public:
 class Z85 {
 	unordered_map<uint8_t, uint8_t> table_;
 	mat<rgb>& input_;
-	string codes_;
+	vector<uint8_t> codes_;
 	uint32_t buffer_;
 	int N_rotation_ = 0;
 	bool needsPadding_;
 	uint8_t paddingNumber_;
+	vector<uint32_t> raw_bins_;
 
 	void create_table() {
 		// create the table 
@@ -89,11 +89,11 @@ class Z85 {
 		}
 
 		for (uint8_t i = 10; i <= 35; i++) {
-			m[i] = 97 + i;
+			m[i] = 87 + i;
 		}
 
 		for (uint8_t i = 36; i <= 61; i++) {
-			m[i] = 65 + i;
+			m[i] = 29 + i;
 		}
 
 		vector<uint8_t> other = { '.','-',':','+','=','^','!','/','*','?','&','<','>','(',')','[',']','{','}','@','%','$','#'};
@@ -110,7 +110,7 @@ class Z85 {
 	}
 
 public:
-	Z85(mat<rgb> input,int rotations) : input_(input), N_rotation_(rotations), codes_(0), buffer_(0) {
+	Z85(mat<rgb>& input,int rotations) : input_(input), N_rotation_(rotations), codes_(0), buffer_(0) {
 		
 		create_table();
 
@@ -119,9 +119,46 @@ public:
 	}
 
 	void encode() {
-		
-		for (size_t i = 0; i < input_.size(); i += 4) {
-			//array<uint8_t,4> quad_base10 = {input_.raw_data[i],}
+		uint32_t dec = 0;
+		deque<uint8_t> v;
+
+		for (size_t r = 0; r < input_.rows(); r++) {
+			for (size_t c = 0; c < input_.cols(); c++) {
+
+				auto num = input_(r, c)[0];
+				v.push_back(input_(r, c)[0]);
+				v.push_back(input_(r, c)[1]);
+				v.push_back(input_(r, c)[2]);
+
+				if (v.size() >= 4) {
+					uint32_t x = 0;
+
+					// byte piu' significativo
+					dec |= v[0];
+
+					dec <<= 24;
+
+					// 2 byte
+					x |= v[1];
+					x <<= 16;
+					dec += x;
+					x = 0;
+
+					// 3 byte
+					x |= v[2];
+					x <<= 8;
+					dec += x;
+
+					// 4 byte
+					dec += v[3];
+
+					raw_bins_.push_back(dec);
+					dec = 0;
+
+					v.clear();
+
+				}
+			}
 		}
 		
 	}
@@ -215,6 +252,8 @@ void encode(const int& N, const string& filename_in, const string& filename_out)
 		error("error in loading the file\n");
 
 	Z85 z85_base(img, 1);
+
+	z85_base.encode();
 
 
 
