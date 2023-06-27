@@ -28,5 +28,8 @@
     <None Include="im1.pbm">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\..\..\..\..\..\Downloads\im2.pbm">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

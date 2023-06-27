@@ -188,6 +188,7 @@
     <ClInclude Include="pbm.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\..\..\..\..\Downloads\im2.pbm" />
     <None Include="im1.pbm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -59,38 +59,14 @@ struct bitreader {
 	}
 };
 
-struct Image {
-	int W;
-	int H;
-	vector<uint8_t> ImageData;
-
-	Image(int height = 0, int width = 0): H(height), W(width), ImageData(0){}
-
-
-	Image BinaryImageToImage(const BinaryImage& bimg) {
-		// vettore che dovrebbe essere di 500 per 500 
-
-		H = bimg.H;
-		W = bimg.W;
-		ImageData.resize(H,W);
-
-		for (size_t r = 0; r < H; r++) {
-			for (size_t c = 0; c < W; c++) {
-				// trasferimento 
-			}
-		}
-
-	}
-};
-
-
 struct BinaryImage {
 	int W;
 	int H;
+	int n_bytes;
 	vector<uint8_t> ImageData;
 
 
-	BinaryImage(int height = 0, int width = 0): H(height), W(width), ImageData(0){}
+	BinaryImage(int height = 0, int width = 0): H(height), W(width), ImageData(0),n_bytes(0){}
 
 	bool ReadFromPBM(const string& filename) {
 
@@ -130,12 +106,9 @@ struct BinaryImage {
 
 		W = stoi(width);
 
-		int n_bytes = 0;
-
-		bool flag = false;
+		
 		if (W % 8 != 0) {
 			 n_bytes = W / 8 +1;
-			flag = true;
 		}
 		else
 		{
@@ -185,6 +158,19 @@ struct BinaryImage {
 		return true;
 	}
 };
+
+struct Image {
+	int W;
+	int H;
+	vector<uint8_t> ImageData;
+
+	Image(int height = 0, int width = 0) : H(height), W(width), ImageData(0) {}
+
+
+	
+};
+
+Image BinaryImageToImage(const BinaryImage& bimg);
 
 
 
