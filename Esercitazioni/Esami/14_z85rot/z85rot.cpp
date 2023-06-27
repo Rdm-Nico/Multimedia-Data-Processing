@@ -10,11 +10,17 @@
 #include<iomanip>
 #include<array>
 #include<cstdint>
+#include<streambuf>
 #include<string>
 
 using namespace std;
 
 
+
+template<typename T>
+streambuf& raw_read(streambuf& is, T& val, size_t size = sizeof(T)) {
+	return is.read(reinterpret_cast<char*>(&val), size);
+}
 
 using rgb = array<uint8_t, 3>;
 
@@ -111,6 +117,15 @@ public:
 		needsPadding_ = input_.size() % 4 != 0 ? true : false;
 		
 	}
+
+	void encode() {
+		
+		for (size_t i = 0; i < input_.size(); i += 4) {
+			//array<uint8_t,4> quad_base10 = {input_.raw_data[i],}
+		}
+		
+	}
+
 };
 
 
@@ -198,6 +213,8 @@ void encode(const int& N, const string& filename_in, const string& filename_out)
 
 	if (!load_ppm(img, filename_in))
 		error("error in loading the file\n");
+
+	Z85 z85_base(img, 1);
 
 
 
