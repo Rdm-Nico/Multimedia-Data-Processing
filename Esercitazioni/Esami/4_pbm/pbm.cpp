@@ -10,8 +10,12 @@ int main(int argc, char* argv[]) {
 		return false;
 	}
 
-	BinaryImage img;
-	bool ris = img.ReadFromPBM(argv[1]);
+	BinaryImage img_bin;
+	bool ris = img_bin.ReadFromPBM(argv[1]);
+
+	Image img;
+	img.BinaryImageToImage(img_bin);
+
 
 	return 0;
 }
