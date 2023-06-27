@@ -72,13 +72,16 @@ public:
 
 class Z85 {
 	unordered_map<uint8_t, uint8_t> table_;
-	mat<rgb>& input_;
+	mat<rgb> input_;
 	vector<uint8_t> codes_;
 	uint32_t buffer_;
 	int N_rotation_ = 0;
 	bool needsPadding_;
 	uint8_t paddingNumber_;
 	vector<uint32_t> raw_bins_;
+	vector<uint8_t> data_;
+	size_t count_, actualRotation_;
+	vector<uint8_t> encoded_;
 
 	void create_table() {
 		// create the table 
@@ -110,22 +113,56 @@ class Z85 {
 	}
 
 public:
-	Z85(mat<rgb>& input,int rotations) : input_(input), N_rotation_(rotations), codes_(0), buffer_(0) {
-		
+	Z85(int rotations) : N_rotation_(rotations) {
+		create_table();
+	};
+
+	Z85(mat<rgb> input, int rotations) : input_(input), N_rotation_(rotations), codes_(0), buffer_(0), actualRotation_(0){
+
 		create_table();
 
 		needsPadding_ = input_.size() % 4 != 0 ? true : false;
+
+	};
+
+	void Tobase85(uint32_t in ) {
+		vector<uint8_t> v;
+
+		while (true) {
+			if (in == 0 && v.size() == 5)
+				break;
+			if (v.size() < 5 && in == 0) {
+				v.push_back(0);
+				continue;
+			}
+			uint32_t r = in % 85;
+			in /= 85;
+			v.push_back(r);
+		}
+		count_ += v.size();
 		
+		for (auto it = v.rbegin(); it != v.rend(); it++) {
+			data_.push_back(*it);
+		}
+	}
+
+	uint8_t getRotatedIndex(int N, uint8_t e) {
+		int index = e - actualRotation_;
+		index = index < 0 ? index += (table_.size() - 1) : index;
+		actualRotation_ += N_rotation_;
+
+		return static_cast<uint8_t>(index);
 	}
 
 	void encode() {
 		uint32_t dec = 0;
 		deque<uint8_t> v;
 
+
+
 		for (size_t r = 0; r < input_.rows(); r++) {
 			for (size_t c = 0; c < input_.cols(); c++) {
 
-				auto num = input_(r, c)[0];
 				v.push_back(input_(r, c)[0]);
 				v.push_back(input_(r, c)[1]);
 				v.push_back(input_(r, c)[2]);
@@ -155,13 +192,44 @@ public:
 					raw_bins_.push_back(dec);
 					dec = 0;
 
-					v.clear();
+					for (size_t i = 0; i < 4; i++)
+						v.pop_front();
 
 				}
 			}
 		}
+
+		if (needsPadding_ && v.size() > 0) {
+			size_t diff = v.size();
+			uint8_t bits = 24;
+			uint32_t dec = 0;
+			for (auto e : v) {
+				dec <<= bits;
+				dec |= e;
+				bits -= 8;
+			}
+			while (diff-- > 0) {
+				dec <<= bits;
+				bits -= 8;
+			}
+
+			raw_bins_.push_back(dec);
+		}
+
+		// trasformare in base 85
+		for (auto e : raw_bins_) {
+			Tobase85(e);
+		}
+
+		// e poi lo codifichiamo 
+		for (auto e : data_) {
+			uint8_t index = getRotatedIndex(N_rotation_, e);
+			encoded_.push_back(table_.at(index));
+		}
 		
 	}
+
+	auto encoded_codes() { return encoded_; }
 
 };
 
@@ -255,8 +323,20 @@ void encode(const int& N, const string& filename_in, const string& filename_out)
 
 	z85_base.encode();
 
+	// scriviamo il file di output:
+	ofstream out(filename_out, ios::binary);
 
+	out << img.cols();
+	out << ',';
+	out << img.rows();
+	out << ',';
+	for (auto e : z85_base.encoded_codes()) {
+		out << e;
+	}
 
+	if (out.fail()) {
+		error("error in create the output file\n");
+	}
 }
 
 void decode(const int& N, const string& filename_in, const string& filename_out) {
