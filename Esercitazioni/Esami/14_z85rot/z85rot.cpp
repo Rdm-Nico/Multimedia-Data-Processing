@@ -11,6 +11,7 @@
 #include<array>
 #include<cstdint>
 #include<string>
+#include<stdlib.h>
 
 using namespace std;
 
@@ -82,6 +83,7 @@ class Z85 {
 	vector<uint8_t> data_;
 	size_t count_, actualRotation_;
 	vector<uint8_t> encoded_;
+	bool flag_ = false;
 
 	void create_table() {
 		// create the table 
@@ -107,13 +109,22 @@ class Z85 {
 			count++;
 		 }
 		
-		for (auto e : m) {
-			table_[e.first] = e.second;
+		if(!flag_){
+			for (auto e : m) {
+				table_[e.first] = e.second;
+			}
 		}
+		else
+		{
+			for (auto e : m) {
+				table_[e.second] = e.first;
+			}
+		}
+		
 	}
 
 public:
-	Z85(int rotations) : N_rotation_(rotations) {
+	Z85(int rotations,bool flag) : N_rotation_(rotations), flag_(flag) {
 		create_table();
 	};
 
@@ -148,7 +159,7 @@ public:
 
 	uint8_t getRotatedIndex(int N, uint8_t e) {
 		int index = e - actualRotation_;
-		index = index < 0 ? index += (table_.size() - 1) : index;
+		index = index < 0 ? index += table_.size() : index;
 		actualRotation_ += N_rotation_;
 
 		return static_cast<uint8_t>(index);
@@ -229,7 +240,16 @@ public:
 		
 	}
 
+	uint8_t GetRealIndex(uint8_t e) {
+		int index = e + actualRotation_;
+		index = index >= 85 ? index -= table_.size() : index;
+		actualRotation_ += N_rotation_;
+
+		return static_cast<uint8_t>(index);
+	}
+
 	auto encoded_codes() { return encoded_; }
+	auto table() { return table_; }
 
 };
 
@@ -265,8 +285,21 @@ bool load_ppm(mat<rgb>& img, const string& filename_in) {
 	if (magic_number != "P6")
 		error("error in loading\n");
 
-	string width_s;
 	char v;
+
+	if(is.peek() == '#'){
+		string comment_section;
+	
+		while (true) {
+			is.get(v);
+			if (v == '\n')
+				break;
+			comment_section.push_back(v);
+		}
+	}
+
+	string width_s;
+	
 	while (true) {
 		is.get(v);
 		if (v == ' ')
@@ -298,6 +331,7 @@ bool load_ppm(mat<rgb>& img, const string& filename_in) {
 	img.resize(h,w);
 
 	/*
+	* if ascii
 	for (int r = 0; r < img.rows(); ++r) {
 		for (int c = 0; c < img.cols(); ++c) {
 			img(r, c)[0] = get_byte(is);
@@ -319,7 +353,7 @@ void encode(const int& N, const string& filename_in, const string& filename_out)
 	if (!load_ppm(img, filename_in))
 		error("error in loading the file\n");
 
-	Z85 z85_base(img, 1);
+	Z85 z85_base(img, N);
 
 	z85_base.encode();
 
@@ -339,7 +373,160 @@ void encode(const int& N, const string& filename_in, const string& filename_out)
 	}
 }
 
+void save_ppm(mat<rgb> img, const string& filename) {
+	ofstream out(filename, ios::binary);
+
+	if (!out)
+		error("error in creating the output file\n");
+	out << "P6";
+	out << '\x0A';
+	out << img.cols();
+	out << '\x0A';
+	out << img.rows();
+	out << '\x0A';
+	out << 255;
+	out << '\x0A';
+
+	/*
+	// 1 alternativa
+	for (int r = 0; r < img.rows(); r++) {
+		for (int c = 0; c < img.cols(); c++) {
+			out.put(img(r, c)[0]);
+			out.put(img(r, c)[1]);
+			out.put(img(r, c)[2]);
+		}
+	}
+	*/
+
+	// 2 alternativa
+	out.write(img.raw_data(), img.raw_size());
+
+}
+
 void decode(const int& N, const string& filename_in, const string& filename_out) {
+
+	ifstream is(filename_in, ios::binary);
+	if (!is) {
+		error("in opening the file\n");
+	}
+
+	string width;
+	string height;
+	char tmp_c;
+	while (true) {
+		is.get(tmp_c);
+		if (tmp_c == ',')
+			break;
+		width.push_back(tmp_c);
+	}
+
+	int W = stoi(width);
+
+	while (true) {
+		is.get(tmp_c);
+		if (tmp_c == ',')
+			break;
+		height.push_back(tmp_c);
+	}
+
+	int H = stoi(height);
+
+	mat<rgb> img(H, W);
+
+	Z85 z85_base(N,true);
+
+	deque<uint8_t> bins(0);
+	vector<uint32_t> raw_bins(0);
+
+	while (true) {
+		if (!is || is.eof())
+			break;
+
+		char c;
+		is.get(c);
+		if (!is)
+			break;
+
+		
+		uint8_t val = z85_base.table()[c];
+
+		uint8_t real_val = z85_base.GetRealIndex(val);
+
+		bins.push_back(real_val);
+	}
+
+	if (bins.size() % 5 != 0) {
+		error("this is impossibile\n");
+	}
+
+	// avremo i valori in base 85 da tornare a trasformare in base 10, 5 valori alla volta
+
+	uint32_t v = 0;
+	while (bins.size() > 0) {
+		for (int j = 4; j >= 0; --j) {
+			uint8_t num = bins.front();
+			v += num * pow(85, j);
+			bins.pop_front();
+		}
+		raw_bins.push_back(v);
+		v = 0;
+	}
+
+	// da qua poi e' necessario trasformare ogni valori nel suo corrispondendete numero in base 16
+	vector<uint8_t> data_img;
+
+
+	for (auto e : raw_bins) {
+		
+		uint8_t f = 0, s = 0, t = 0, fou = 0;
+
+		f = (e >> 24);
+		s = (e >> 16);
+		t = (e >> 8);
+
+		unsigned mask = (1 << 8); 
+		/*
+			in f = 1111'1111 (255)
+			cosi' facendo otteniamo una maschera di 8 bit:  0001'0000'0000 (256)
+		*/
+		mask -= 1; // maschera a 255 ora
+
+		fou = e & mask;
+
+
+		data_img.push_back(f);
+		data_img.push_back(s);
+		data_img.push_back(t);
+		data_img.push_back(fou);
+
+		/*
+		while (e > 0) {
+			uint8_t rest = e % 16;
+			e /= 16;
+
+			switch (rest)
+			{
+			case 10: { rest = 'A'; break; }
+			case 11: { rest = 'B'; break; }
+			case 12: { rest = 'C'; break; }
+			case 13: { rest = 'D'; break; }
+			case 14: { rest = 'E'; break; }
+			case 15: { rest = 'F'; break; }
+			default:
+				break;
+			}
+
+			data_img.push_back(rest);
+		}
+		*/
+		
+	}
+
+	copy(data_img.begin(), data_img.end(), img.raw_data());
+
+
+	save_ppm(img,filename_out);
+
 
 }
 
