@@ -9,7 +9,7 @@
 #include<string>
 #include<cassert>
 #include<sstream>
-
+#include<array>
 
 using namespace std;
 
@@ -19,6 +19,7 @@ istream& raw_read(istream& is, T& val, size_t size = sizeof(T)) {
 	return is.read(reinterpret_cast<char*>(&val), size);
 }
 
+using vec3b = array<uint8_t, 3>;
 
 template<typename T>
 struct mat {
@@ -166,6 +167,48 @@ bool save_pgm(mat<uint8_t>& img, const string& filename) {
 
 
 
+void ToRGB(mat<vec3b>& dest, mat<uint8_t>& m) {
+
+	bool r_or_b = true;
+	for (size_t r = 0; r < dest.rows(); ++r) {
+		for (size_t c = 0; c < dest.cols(); ++c) {
+			
+			// se riga pari --> siamo nel caso red/ green 
+			// se riga dispari --> siamo nel caso green/blue
+			if (r == 0 || r % 2 == 0) {
+				if (r_or_b) {
+					dest(r, c)[0] = m(r, c);
+					r_or_b = false;
+				}
+				else
+				{
+					// è un pixel verde
+					dest(r, c)[1] = m(r, c);
+					r_or_b = true;
+				}
+			}
+			else
+			{
+				if (r_or_b) {
+					// pixel blu
+					dest(r, c)[2] = m(r, c);
+					r_or_b = false;
+				}
+				else
+				{
+					// è un pixel verde
+					dest(r, c)[1] = m(r, c);
+					r_or_b = true;
+				}
+			}
+		}
+		if (r == 0 || r % 2 == 0)
+			r_or_b = false;
+		else
+			r_or_b = true;
+	}
+}
+
 
 int main(int argc, char* argv[]) {
 	if (argc != 3)
@@ -188,6 +231,9 @@ int main(int argc, char* argv[]) {
 	if (!save_pgm(img_8, ss.str()))
 		return EXIT_FAILURE;
 	
+	mat<vec3b> img_rgb(img_8.rows(),img_8.cols());
+
+	ToRGB(img_rgb, img_8);
 
 	return EXIT_SUCCESS;
 }
