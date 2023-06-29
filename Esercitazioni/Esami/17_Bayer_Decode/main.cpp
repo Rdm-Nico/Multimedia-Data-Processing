@@ -55,10 +55,10 @@ public:
 	}
 
 	char* raw_data() {
-		return reinterpret_cast<char*>(data_[0]);
+		return reinterpret_cast<char*>(&data_[0]);
 	}
 	const char* raw_data() const {
-		return reinterpret_cast<const char*>(data_[0]);
+		return reinterpret_cast<const char*>(&data_[0]);
 	}
 
 	auto begin() { return data_.begin(); }
@@ -210,6 +210,34 @@ void ToRGB(mat<vec3b>& dest, mat<uint8_t>& m) {
 }
 
 
+bool save_ppm(const string& filename, const mat<vec3b>& img, bool ascii)
+{
+	std::ofstream os(filename, std::ios::binary);
+	if (!os)
+		return false;
+
+	os << (ascii ? "P3" : "P6") << "\n";
+	os << "# MDP2020\n";
+	os << img.cols() << " " << img.rows() << "\n";
+	os << "255\n";
+
+	if (ascii) {
+		for (int r = 0; r < img.rows(); ++r) {
+			for (int c = 0; c < img.cols(); ++c) {
+				os << static_cast<int>(img(r, c)[0]) << " "
+					<< static_cast<int>(img(r, c)[1]) << " "
+					<< static_cast<int>(img(r, c)[2]) << " ";
+			}
+			os << "\n";
+		}
+	}
+	else {
+		os.write(img.raw_data(), img.raw_size());
+	}
+
+	return true;
+}
+
 int main(int argc, char* argv[]) {
 	if (argc != 3)
 		error("Error Usage: bayer_decode <input file .PGM> <output prefix>\n");
@@ -230,10 +258,20 @@ int main(int argc, char* argv[]) {
 
 	if (!save_pgm(img_8, ss.str()))
 		return EXIT_FAILURE;
+
+	
 	
 	mat<vec3b> img_rgb(img_8.rows(),img_8.cols());
 
 	ToRGB(img_rgb, img_8);
+
+	stringstream uu;
+	uu << argv[2];
+	uu << "_bayer.ppm";
+
+	if (!save_ppm(uu.str(), img_rgb,false))
+		return EXIT_FAILURE;
+
 
 	return EXIT_SUCCESS;
 }
