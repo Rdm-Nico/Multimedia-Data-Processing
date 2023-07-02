@@ -31,10 +31,9 @@ public:
 		}
 		case 'l': {
 			is >> type_;
-			// ???? list_.emplace_back(elem(is)); ???
 
 			while (is.peek() != 'e') {
-				list_.emplace_back(is);
+				list_.emplace_back(is); // emplace back allunga un po la lista e utilizza elem senza copiarlo 
 			}
 			is >> end;
 			break;
