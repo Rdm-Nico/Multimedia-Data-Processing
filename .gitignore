@@ -362,5 +362,4 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Esercitazioni/huffdiff/diff.pam
-*.h
 /Esercitazioni/Esami/4_Y4M/test1.y4m
