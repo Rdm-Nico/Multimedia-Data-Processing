@@ -3,10 +3,12 @@
 #include<algorithm>
 #include<string>
 #include<sstream>
+#include<cmath>
 
 #include "mat.h"
 #include "types.h"
 #include "utils.h"
+#include "ppm.h"
 
 using namespace std;
 
@@ -146,10 +148,10 @@ bool y4m_extract_gray(const string& filename, vector<mat<uint8_t>>& frames) {
 
 
 template<typename T>
-void saturate(mat<T>& vector, const int min, const int max) {
-	for (auto& e : vector) {
-		e = e < min ? min : e > max ? max : e;
-	}
+void saturate(T& e, const int min, const int max) {
+	
+	e = e < min ? min : e > max ? max : e;
+	
 }
 
 bool y4m_extract_color(const std::string& filename, std::vector<mat<vec3b>>& frames) {
@@ -268,30 +270,61 @@ bool y4m_extract_color(const std::string& filename, std::vector<mat<vec3b>>& fra
 		is.read(Cr.rawdata(), Cr.rawsize());
 
 
-		// upsampling 
-		Cb.resize(Y.rows(), Y.cols());
-		Cr.resize(Y.rows(), Y.cols());
+		
 
 
 		mat<vec3b> frame(Y.rows(),Y.cols());
 
+
 		// facciamo adesso la saturzione 
-		saturate(Y, 16, 235);
-		saturate(Cb, 16, 240);
-		saturate(Cr, 16, 240);
+		for(auto& e:Y)
+			saturate(e, 16, 235);
+		for(auto& e:Cb)
+			saturate(e, 16, 240);
+		for(auto& e:Cr)
+			saturate(e, 16, 240);
+		
+		
 
 
 		// e poi si realizza la formula richiesta 
+		for (int r = 0; r < Y.rows(); r++) {
+			for (int c = 0; c < Y.cols(); c++) {
+				double R_val = 0;
+				double G_val = 0;
+				double B_val = 0;
 
 
-		// e poi si ri fa una saturazione  
-		saturate(frame, 0, 255);
+				/* per fare upsampling è necessario prendere la posizione dimezzata in altezza e in larghezza per Cb e Cr*/
+				double Y_val = Y(r, c) - 16;
+				double Cb_val = Cb(r/2, c/2) - 128;
+				double Cr_val = Cr(r/2,c/2) - 128;
 
+				 R_val = (Y_val * 1.164) + (Cr_val*1.596);
+				 G_val = (Y_val * 1.164) - ((Cb_val*0.392) + (Cr_val* 0.813));
+				 B_val = (Y_val* 1.164) + (Cb_val * 2.017);
+
+				 saturate(R_val, 0, 255);
+				 saturate(G_val, 0, 255);
+				 saturate(B_val, 0, 255);
+				
+				 
+				 frame(r, c)[0] = static_cast<uint8_t>(lround(R_val));
+				 frame(r, c)[1] = static_cast<uint8_t>(lround(G_val));
+				 frame(r, c)[2] = static_cast<uint8_t>(lround(B_val));
+
+			}
+		}
+		
+		
+
+		frames.push_back(frame);
 	}
 	
 	
 	return true;
 }
+
 
 int main(void) {
 
@@ -307,6 +340,9 @@ int main(void) {
 		return EXIT_FAILURE;
 	}
 
+	save_ppm("foreman_cif_output.ppm", frames[0]);
+
 	return EXIT_SUCCESS;
 }
+
 
